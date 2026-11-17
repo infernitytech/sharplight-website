@@ -27,7 +27,7 @@ On one NVIDIA RTX PRO 4500 (32 GB), in November 2026:
 |---|---|
 | Single-stream generation, against llama.cpp CUDA (same GGUF files) | 0.88-0.99x: slightly behind on every model |
 | Single-stream generation, against llama.cpp Vulkan | 0.99-1.09x |
-| Prompt processing at 512 tokens, against llama.cpp CUDA | 0.86-1.22x: ahead on five of seven models, behind on gpt-oss-20b |
+| Prompt processing at 512 tokens, against llama.cpp CUDA | 0.86-1.22x: ahead on four of seven models, level on two, behind on gpt-oss-20b |
 | Serving 1 to 64 simultaneous streams, against llama.cpp's server | 1.1-4.4x |
 | Generation, against vLLM on identical weights | 0.95-1.08x: level |
 | Prompt processing, against vLLM on identical weights | 0.73-1.01x at 2048 tokens: behind on three of four models |
@@ -88,8 +88,8 @@ Collected in one place, from the charts above and the engine's own list of open 
 
 - **Other GPUs.** Everything above is one NVIDIA card. Sharplight's tests also pass on an AMD integrated GPU and on a
   software Vulkan driver, but there are no comparable published benchmarks for AMD or Intel GPUs yet.
-- **Apple silicon.** A native Metal provider is in progress. Its only measurements so far ran on a virtualized CI
-  machine, which is not representative, so they are not charted.
+- **Apple silicon.** The native Metal provider is new. Its only measurements so far (section 41 of the log) ran on a
+  virtualized CI machine, which the log itself calls indicative only, so they are not charted.
 - **CPU.** The engine log has CPU comparisons with llama.cpp and onnxruntime on an earlier machine; they will be added
   when re-measured on the current one.
 - **Quality.** Speed says nothing about output quality. Correctness is covered separately: models are compared with

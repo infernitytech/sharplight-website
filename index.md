@@ -104,11 +104,11 @@ These are our own measurements on one GPU model. [Read the method and the caveat
 
 | | Windows | Linux | macOS (Apple silicon) |
 |---|---|---|---|
-| GPU, through Vulkan | x64, ARM64 | x64, ARM64 | through the bundled MoltenVK |
+| GPU | Vulkan (x64, ARM64) | Vulkan (x64, ARM64) | Metal (new), or Vulkan through the bundled MoltenVK |
 | CPU | yes | yes | yes |
 | Studio installer | Setup.exe, portable zip | AppImage | .pkg, zip |
 
-A native Metal provider for Apple silicon is in progress. [Hardware and providers]({{ '/docs/hardware/' | relative_url }})
+The native Metal provider for Apple silicon is new on the development line and has only been measured on a virtualized test machine so far. [Hardware and providers]({{ '/docs/hardware/' | relative_url }})
 
 ## Open source
 
