@@ -203,3 +203,80 @@
       results: [{ engine: Sharplight (fast), value: 4.71 }, { engine: onnxruntime CUDA, value: 4.54 }]
     - label: qwen2.5-0.5b q4 (decode step)
       results: [{ engine: Sharplight (fast), value: 3.48 }, { engine: onnxruntime CUDA, value: 6.03 }]
+
+- id: prefill-vllm
+  title: Prompt processing against vLLM on identical weights
+  unit: tokens/s
+  higher_is_better: true
+  description: Prompt tokens processed per second for prompts of 512, 2048 and 8192 tokens, on the same Hugging Face checkpoints.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; one session, no other process on the GPU.
+  versions: Sharplight develop at af8f2608 with branch perf/llm-r5 (Vulkan provider); vLLM 0.33.0 (CUDA).
+  methodology: >-
+    bf16 checkpoints, and the FP8 checkpoint for Qwen3-8B FP8, on both engines. Prompts of 512, 2048 and 8192 random token ids, no prefix caching. One process run per engine and model, one warm-up prefill and 5 timed prefills per length; median of the 5 on every side.
+  caveats:
+    - Sharplight is 0.70-0.74x of vLLM on Qwen3-8B FP8 and 0.87-0.90x on Qwen3-8B bf16; it is ahead only on the two small models at 512 and 2048 tokens (Qwen3-0.6B at 512 tokens: 2.02x).
+    - At 8192 tokens Sharplight is behind vLLM on every model (0.74-0.88x).
+    - One GPU model. Results on other hardware will differ.
+  source: "docs/benchmarks.md section 40.9"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-17
+  groups:
+    - label: Qwen3-0.6B bf16, 512 tokens
+      results: [{ engine: Sharplight, value: 61062 }, { engine: vLLM, value: 30203 }]
+    - label: Qwen3-0.6B bf16, 2048 tokens
+      results: [{ engine: Sharplight, value: 84458 }, { engine: vLLM, value: 80743 }]
+    - label: Qwen3-0.6B bf16, 8192 tokens
+      results: [{ engine: Sharplight, value: 51887 }, { engine: vLLM, value: 59802 }]
+    - label: Llama-3.2-1B bf16, 512 tokens
+      results: [{ engine: Sharplight, value: 45544 }, { engine: vLLM, value: 44107 }]
+    - label: Llama-3.2-1B bf16, 2048 tokens
+      results: [{ engine: Sharplight, value: 53369 }, { engine: vLLM, value: 54322 }]
+    - label: Llama-3.2-1B bf16, 8192 tokens
+      results: [{ engine: Sharplight, value: 42176 }, { engine: vLLM, value: 48653 }]
+    - label: Qwen3-8B bf16, 512 tokens
+      results: [{ engine: Sharplight, value: 7285 }, { engine: vLLM, value: 8114 }]
+    - label: Qwen3-8B bf16, 2048 tokens
+      results: [{ engine: Sharplight, value: 7583 }, { engine: vLLM, value: 8755 }]
+    - label: Qwen3-8B bf16, 8192 tokens
+      results: [{ engine: Sharplight, value: 6716 }, { engine: vLLM, value: 7653 }]
+    - label: Qwen3-8B FP8, 512 tokens
+      results: [{ engine: Sharplight, value: 10309 }, { engine: vLLM, value: 14770 }]
+    - label: Qwen3-8B FP8, 2048 tokens
+      results: [{ engine: Sharplight, value: 10722 }, { engine: vLLM, value: 14956 }]
+    - label: Qwen3-8B FP8, 8192 tokens
+      results: [{ engine: Sharplight, value: 9057 }, { engine: vLLM, value: 12317 }]
+
+- id: prefill-llamacpp
+  title: Prompt processing against llama.cpp CUDA on the same GGUF files
+  unit: tokens/s
+  higher_is_better: true
+  description: Prompt tokens processed per second for prompts of 512, 2048 and 8192 tokens.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; one session, no other process on the GPU.
+  versions: Sharplight develop at af8f2608 with branch perf/llm-r5 (Vulkan provider); llama.cpp b11177, official CUDA build, llama-bench -ngl 99 -fa 1 with default batch sizes.
+  methodology: >-
+    The same GGUF file on both engines. Prompts of 512, 2048 and 8192 random token ids, no prefix caching. One process run per engine and model, one warm-up prefill and 5 timed prefills per length; median of the 5 on every side.
+  caveats:
+    - Sharplight is 0.93-0.95x of llama.cpp on Qwen3-8B Q4_K_M at every length and 0.84x on Llama-3.2-1B at 512 tokens.
+    - One GPU model. Results on other hardware will differ.
+  source: "docs/benchmarks.md section 40.9"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-17
+  groups:
+    - label: Qwen3-0.6B Q8_0, 512 tokens
+      results: [{ engine: Sharplight, value: 60628 }, { engine: llama.cpp CUDA, value: 50393 }]
+    - label: Qwen3-0.6B Q8_0, 2048 tokens
+      results: [{ engine: Sharplight, value: 78302 }, { engine: llama.cpp CUDA, value: 47411 }]
+    - label: Qwen3-0.6B Q8_0, 8192 tokens
+      results: [{ engine: Sharplight, value: 49540 }, { engine: llama.cpp CUDA, value: 36731 }]
+    - label: Llama-3.2-1B Q8_0, 512 tokens
+      results: [{ engine: Sharplight, value: 35905 }, { engine: llama.cpp CUDA, value: 42839 }]
+    - label: Llama-3.2-1B Q8_0, 2048 tokens
+      results: [{ engine: Sharplight, value: 43077 }, { engine: llama.cpp CUDA, value: 42196 }]
+    - label: Llama-3.2-1B Q8_0, 8192 tokens
+      results: [{ engine: Sharplight, value: 35972 }, { engine: llama.cpp CUDA, value: 36735 }]
+    - label: Qwen3-8B Q4_K_M, 512 tokens
+      results: [{ engine: Sharplight, value: 6645 }, { engine: llama.cpp CUDA, value: 7007 }]
+    - label: Qwen3-8B Q4_K_M, 2048 tokens
+      results: [{ engine: Sharplight, value: 6378 }, { engine: llama.cpp CUDA, value: 6874 }]
+    - label: Qwen3-8B Q4_K_M, 8192 tokens
+      results: [{ engine: Sharplight, value: 5768 }, { engine: llama.cpp CUDA, value: 6233 }]

@@ -3,7 +3,7 @@ title: Benchmarks
 lead: Sharplight next to llama.cpp, vLLM and onnxruntime, including where the other engine is ahead.
 description: Reproducible Sharplight benchmarks against llama.cpp, vLLM and onnxruntime, with method, hardware, versions and caveats.
 permalink: /benchmarks/
-charts: [decode-llamacpp, serving-throughput, serving-throughput-moe, vllm-decode, vllm-ttft, onnx-latency]
+charts: [decode-llamacpp, prefill-llamacpp, serving-throughput, serving-throughput-moe, vllm-decode, prefill-vllm, vllm-ttft, onnx-latency]
 ---
 
 ## Read this first
@@ -23,9 +23,10 @@ One NVIDIA RTX PRO 4500 (32 GB), November 2026. Sharplight runs on Vulkan in eve
 |---|---|
 | llama.cpp CUDA, single-stream generation (same GGUF files) | 0.88-0.99x |
 | llama.cpp Vulkan, single-stream generation | 0.99-1.09x |
-| llama.cpp CUDA, prompt processing at 512 tokens | 0.86-1.22x: ahead on four of seven models, behind on gpt-oss-20b |
+| llama.cpp CUDA, prompt processing (same GGUF files, 512-8192 tokens) | 0.84-1.65x: ahead on Qwen3-0.6B, mixed on Llama-3.2-1B, 0.93-0.95x on Qwen3-8B |
 | llama.cpp server, 1 to 64 streams | 1.1-4.4x |
 | vLLM, generation (identical weights) | 0.95-1.08x |
+| vLLM, prompt processing (identical weights, 512-8192 tokens) | 0.70-2.02x: 0.87-0.90x on Qwen3-8B bf16, 0.70-0.74x on Qwen3-8B FP8 |
 | onnxruntime CUDA provider, batch 1 | faster on most measured models; TensorRT is ahead on several |
 
 ## llama.cpp
@@ -33,6 +34,8 @@ One NVIDIA RTX PRO 4500 (32 GB), November 2026. Sharplight runs on Vulkan in eve
 Same GGUF files; llama.cpp with its CUDA and its Vulkan backend.
 
 {% include benchmark-chart.html id="decode-llamacpp" %}
+
+{% include benchmark-chart.html id="prefill-llamacpp" %}
 
 ## Serving
 
@@ -50,6 +53,8 @@ The same Hugging Face checkpoints (bf16; FP8 for the FP8 checkpoint). vLLM on CU
 
 {% include benchmark-chart.html id="vllm-decode" %}
 
+{% include benchmark-chart.html id="prefill-vllm" %}
+
 {% include benchmark-chart.html id="vllm-ttft" %}
 
 ## ONNX
@@ -61,12 +66,12 @@ of onnxruntime's CUDA provider, and is the like-for-like comparison.
 
 ## Where Sharplight is behind
 
-- **Prompt processing against vLLM**: 0.73-0.92x at 2048 tokens on three of four models, 0.73-0.90x at 8192 tokens;
-  hence 0.68-0.78x total throughput at 16 streams with long prompts.
+- **Prompt processing against vLLM**: 0.70-0.90x on Qwen3-8B (bf16 and FP8) at every length, 0.87x on the two small
+  models at 8192 tokens; hence 0.68-0.78x total throughput at 16 streams with long prompts.
 - **Time to first token on 8B models**: 300 ms against vLLM's 239 ms on Qwen3-8B for one stream; also later at 16 streams.
 - **64 streams on Llama-3.2-1B**: 0.75x of vLLM.
 - **Single-stream generation against llama.cpp CUDA**: 1 to 12 % behind, most on the smallest models.
-- **gpt-oss-20b prompt processing**: 0.83-0.86x of llama.cpp CUDA.
+- **Prompt processing against llama.cpp CUDA**: 0.93-0.95x on Qwen3-8B Q4_K_M, 0.84x on Llama-3.2-1B at 512 tokens.
 - **TensorRT**: ahead on ConvNeXt, YOLOv10n, MobileSAM and other rows.
 
 ## Not measured here
