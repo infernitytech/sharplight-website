@@ -8,7 +8,7 @@ permalink: /docs/serving/
 There are three ways to serve, from least to most code:
 
 1. **Sharplight Studio**: switch on the Server page. See [Studio basics]({{ '/docs/studio/' | relative_url }}).
-2. **The `sharplight-server` command-line tool** from the repository's samples.
+2. **The `sharplight serve` command** of the command-line tool.
 3. **`Sharplight.AspNetCore`** in your own application.
 
 ## From the command line
@@ -16,7 +16,7 @@ There are three ways to serve, from least to most code:
 The tool pulls a model from Hugging Face, converts it to a `.slm` package, precompiles it and serves it:
 
 ```sh
-dotnet run -c Release --project samples/Sharplight.Server -- serve Qwen/Qwen3-0.6B-GGUF:Q8_0 --listen http://127.0.0.1:8080
+sharplight serve Qwen/Qwen3-0.6B-GGUF:Q8_0 --listen http://127.0.0.1:8080
 ```
 
 Then, from any OpenAI client or with `curl`:
@@ -30,7 +30,6 @@ curl http://127.0.0.1:8080/v1/chat/completions \
 Other commands of the same tool: `search`, `pull`, `list`, `show`, `run` (interactive chat) and `rm`. Model names are
 `owner/repo[:tag]`; the tag picks a GGUF quantization, and without one the tool takes Q4_K_M, then Q8_0. `--api-key` sets a key.
 
-(This open-source tool serves from one machine. It is not the commercial [Sharplight Server]({{ '/server/' | relative_url }}).)
 
 ## In your application
 

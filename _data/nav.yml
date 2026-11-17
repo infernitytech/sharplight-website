@@ -3,4 +3,5 @@
 - { title: Models, url: /models/ }
 - { title: Benchmarks, url: /benchmarks/ }
 - { title: Docs, url: /docs/ }
+- { title: Enterprise, url: /enterprise/ }
 - { title: Server, url: /server/ }

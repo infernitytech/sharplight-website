@@ -74,10 +74,10 @@ everything in a `.slm` file.
 tools use it:
 
 ```sh
-sharplight-server pull Qwen/Qwen3-0.6B-GGUF:Q8_0        # GGUF quantization by tag
-sharplight-server pull Qwen/Qwen3-0.6B                   # safetensors checkpoint
-sharplight-server list
-sharplight-server run qwen3-0.6b:q8_0                    # interactive chat; pulls first if needed
+sharplight pull Qwen/Qwen3-0.6B-GGUF:Q8_0        # GGUF quantization by tag
+sharplight pull Qwen/Qwen3-0.6B                   # safetensors checkpoint
+sharplight list
+sharplight run qwen3-0.6b:q8_0                    # interactive chat; pulls first if needed
 ```
 
 Without a tag, the puller takes Q4_K_M, then Q8_0, then common fallbacks. Split GGUF files are downloaded completely, and

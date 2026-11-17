@@ -27,10 +27,7 @@ the license stated on each model's page; check it before you use a model commerc
 Sharplight Server is built on the open-source engine through its public NuGet packages. Work on the engine that the server
 needs, and that is useful to anyone else, goes into the open-source repository.
 
-{% comment %} PRODUCT-OWNER SIGN-OFF NEEDED for the next paragraph before publishing. {% endcomment %}
-**Our commitment.** The engine and Studio stay MIT licensed. Features that have been released under the MIT license are
-not moved into the commercial product. The server product is for running Sharplight across an organization (clusters,
-tenants, directory sign-in), not for running a model.
+**License.** Sharplight and Sharplight Studio are MIT licensed. You can use them in commercial and closed-source products, modify them and redistribute them. To contribute, see the section below.
 
 ## Why there is a commercial product
 

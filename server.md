@@ -7,7 +7,7 @@ description: Sharplight Server is a commercial on-premise inference platform in 
 permalink: /server/
 status: In development
 cta:
-  primary: { label: Write to us, url: "mailto:contact@infernity.at?subject=Sharplight%20Server" }
+  primary: { label: Early access — talk to us, url: "mailto:contact@infernity.at?subject=Sharplight%20Server" }
 ---
 
 **Status: in development.** Sharplight Server has not been released. This page describes what is planned for the first
@@ -88,35 +88,15 @@ the same engine, so the models, formats and measured behavior are the ones docum
 Everything in the left column stays available and open source. If one machine and API keys are enough, you do not need
 the server: the [serving guide]({{ '/docs/serving/' | relative_url }}) shows how to run the open-source engine as a service today.
 
-## Hardware and services
+## Hardware and consulting
 
-Sharplight Server is developed by Infernity Technologies GmbH. For organizations that want more than the software, the
-company offers two things alongside it. Neither is required: the server is planned to run on machines you already own, and
-nothing in the open-source products depends on a contract.
-
-### Hardware
-
-Pre-configured inference servers for your own premises. We ask which models you intend to run, for how many people, and
-how you expect that to grow, and size a machine for that load: GPUs, memory, storage. It arrives with Sharplight Server
-installed and tested on that hardware, ready to join your network or an existing cluster.
-
-### Consulting
-
-Help with the questions that come before and after the installation:
-
-- **Use cases**: which tasks in your organization are a good fit for locally run models, and which are not.
-- **Model selection**: which models meet your quality, language and licensing needs within the hardware you have or plan.
-- **Deployment and infrastructure planning**: sizing, network placement, operation and upgrades.
-- **Integration**: connecting your applications through the OpenAI- and Anthropic-compatible APIs.
-- **Privacy and compliance**: what running AI on your own premises changes for data protection, and what it does not.
+Infernity Technologies GmbH also offers inference hardware and consulting, independent of the server product. See [Enterprise]({{ '/enterprise/' | relative_url }}).
 
 ## What to expect from us
 
-- No prices are published while the product is unfinished. They will be when it ships.
 - No release date we cannot keep. Early-access participants hear about progress directly.
 - The benchmark and compatibility pages on this site describe the engine the server uses, including its gaps.
 
-## Get in touch
+## Early access: talk to us
 
-One address for the server, hardware and consulting: [contact@infernity.at](mailto:contact@infernity.at?subject=Sharplight%20Server).
-It helps to mention the models you want to run, roughly how many people would use them, and the machines you have or plan.
+[contact@infernity.at](mailto:contact@infernity.at?subject=Sharplight%20Server%20early%20access). It helps to mention the models you want to run, roughly how many people would use them, and the machines you have or plan.
