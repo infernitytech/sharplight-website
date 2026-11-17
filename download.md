@@ -14,27 +14,13 @@ strings:
   channel_preview: Preview
   channel_preview_note: Built from every change on the development branch. Updates often and may have rough edges.
   no_stable: There is no stable release yet. The preview build is the current version of Studio.
-  channel_switch_note: An installed Studio follows the channel it was installed from. To change channel, install the other package.
-  assume_mac: Detected macOS. Studio needs an Apple silicon Mac (M1 or later).
-  assume_win_x64: Detected Windows (x64). On a Windows ARM device, choose Windows (ARM64).
-  intel_mac: Intel Macs are not supported. Studio needs an Apple silicon Mac (M1 or later).
-  bits32: Sharplight Studio needs a 64-bit system.
-  chromeos: For the Linux development environment on ChromeOS.
-  mobile: Sharplight Studio is a desktop app for Windows, macOS and Linux. Open this page on your computer to download it.
-  checksum_label: SHA-256
-  checksum_missing: Checksums for the installers are not published yet.
-  unsigned: This installer is not code-signed yet, so your system will ask for confirmation the first time. The steps are below.
-  col_installer: Installer
-  col_portable: Portable or archive
----
 
 {% comment %} The download widget (button, channel switch, matrix) is placed here by the layout or include. {% endcomment %}
 {% include download-widget.html %}
 
 ## Channels
 
-**Stable** is built from release branches, **Preview** from every change on the development branch. There is no stable
-release yet. An installed Studio follows the channel it was installed from.
+**Stable** is built from releases, **Preview** from every change on the development branch. Use Stable unless you want the newest changes; you can switch in Studio under Settings → Updates.
 
 ## First start
 

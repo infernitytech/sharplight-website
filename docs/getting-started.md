@@ -16,10 +16,10 @@ permalink: /docs/getting-started/
 ## Install
 
 ```sh
-dotnet add package Sharplight --prerelease
+dotnet add package Sharplight
 ```
 
-The packages are alpha prereleases; the API changes between versions.
+Version 0.2; the API may still change before 1.0.
 
 ## Register and discover devices
 

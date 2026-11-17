@@ -10,7 +10,7 @@ description: >-
 permalink: /
 hero:
   primary: { label: Download Studio, url: /download/ }
-  secondary: { label: "dotnet add package Sharplight --prerelease", url: /developers/, style: code }
+  secondary: { label: "dotnet add package Sharplight", url: /developers/, style: code }
   meta: "MIT licensed · Windows, Linux and macOS · Source on GitHub"
   image: studio-chat
   image_alt: Sharplight Studio's chat page with a conversation streaming from a local model
@@ -84,7 +84,7 @@ One NVIDIA RTX PRO 4500, November 2026, our own measurements:
 | CPU | yes | yes | yes |
 | Studio | Setup.exe, portable zip | AppImage | .pkg, zip |
 
-The packages are alpha prereleases; the API still changes. [Hardware and providers]({{ '/docs/hardware/' | relative_url }})
+Version 0.2; the API may still change before 1.0. [Hardware and providers]({{ '/docs/hardware/' | relative_url }})
 
 ## For organizations
 

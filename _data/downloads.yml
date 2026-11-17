@@ -3,8 +3,8 @@
 base: https://download.sharplight.dev/studio
 releases_url: https://github.com/infernitytech/sharplight/releases
 source_url: https://github.com/infernitytech/sharplight
-# Stable has no release yet: only Preview is offered. Set to true when releases.<rid>-stable.json exists.
-stable_available: false
+# Stable is released (0.2.0 since 2026-11-17).
+stable_available: true
 signed:
   windows: false
   macos: false

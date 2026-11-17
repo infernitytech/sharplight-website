@@ -3,20 +3,14 @@ title: Sharplight for .NET developers
 lead: Run AI models inside your .NET application.
 description: NuGet quick start for Sharplight, the open-source .NET inference engine. Text generation, embeddings, speech, images and serving.
 permalink: /developers/
-install: dotnet add package Sharplight --prerelease
+install: dotnet add package Sharplight
 ---
 
 ```sh
-dotnet add package Sharplight --prerelease
+dotnet add package Sharplight
 ```
 
-.NET 11. Alpha: the API still changes between versions.
-
-{% comment %}
-LAUNCH CHECK (2026-11-17): the package id `Sharplight` is not on nuget.org yet; Sharplight.Core, .Cpu, .Vulkan, .Hub,
-.AspNetCore and .Extensions.AI are (0.1.22-alpha). Do not publish this page with the line above before the entry package
-exists, or show the "from source" path below as the primary one until then.
-{% endcomment %}
+.NET 11. Version 0.2; the API may still change before 1.0.
 
 ## Generate text
 
