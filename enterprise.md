@@ -42,6 +42,7 @@ status: Early access
 ### Predictable cost
 
 - **No per-token fees.** You run on your own hardware; cost does not rise with every request.
+- **No GPU vendor lock-in.** Runs on NVIDIA, AMD and Intel GPUs, so you choose hardware by price and availability.
 - **Hardware that fits.** We size servers for your models and number of users and deliver them with Sharplight
   installed and tested.
 - **Advice before you invest.** We help you choose use cases, models and capacity, so you buy what you need.

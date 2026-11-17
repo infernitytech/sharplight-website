@@ -17,14 +17,14 @@ Intel Macs are not supported.
 
 ## The Vulkan provider
 
-Needs the GPU vendor's Vulkan driver and nothing else. Kernels are written in Slang and compiled to SPIR-V.
+Works with NVIDIA, AMD and Intel GPUs: it needs the GPU vendor's Vulkan driver and nothing else. Kernels are written in Slang and compiled to SPIR-V.
 
 - **Features and fallbacks.** Each device's features are detected. Matrix products run on cooperative matrices where
   the device has them and on fallback kernels where it does not. Every feature has a fallback, and a feature can be
   switched off per device when a driver misbehaves.
 - **Tested on.** An NVIDIA GPU with cooperative matrices, an AMD integrated GPU with the RADV driver (fallback paths)
-  and llvmpipe, a software Vulkan driver. Published benchmarks are from NVIDIA RTX PRO cards. Other vendors' GPUs have
-  not been benchmarked; Intel GPUs have not been tested.
+  and llvmpipe, a software Vulkan driver. Published benchmarks are from NVIDIA RTX PRO cards. Intel GPUs are supported
+  through the same Vulkan path but have not been tested by us yet; reports are welcome.
 - **Several GPUs.** A model can be split over devices by layers, with a CPU fallback for what does not fit.
 - **Precision.** Defaults keep near-f32 accuracy. `--reduced-precision` in the tools (a load option in Studio) opts in
   to half-precision kernel paths where they exist. For ONNX models, `MatrixPrecision.Fast` is an opt-in mode in the
