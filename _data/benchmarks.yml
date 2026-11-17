@@ -1,29 +1,271 @@
-# Schema (the strategist/benchmark owner fills this file):
-# - id: unique slug
+# Benchmark charts for /benchmarks/ (and one chart on the home page).
+# Every number is copied from docs/benchmarks.md in the engine repository; `source` names the section and table.
+#
+# Schema (the implementation's schema, plus optional fields marked +):
+# - id: unique slug (also the anchor on /benchmarks/)
 #   title: chart title
 #   unit: "tokens/s"
 #   higher_is_better: true
 #   description: one sentence
 #   hardware: "..."
-#   versions: "Sharplight 0.1.x, llama.cpp bNNNN"
+#   versions: "..."
 #   methodology: "..."
 #   caveats: ["...", "..."]
+# + source: section and table of docs/benchmarks.md
+# + source_url: link to the file on GitHub
+# + date: measurement date
+# + chart: "bars" (default) | "lines" (x = group label, one line per engine)
+# + home: true for the chart shown on the home page
 #   groups:                       # one bar cluster per group (model, scenario)
-#     - label: "Qwen3 0.6B Q8_0"
+#     - label: "..."
 #       results:
 #         - { engine: Sharplight, value: 100 }
-#         - { engine: llama.cpp, value: 90 }
-- id: placeholder
-  title: Placeholder chart (not real data)
+#       + note: per-group remark
+#
+# Engines are named exactly as they should appear in legends. Do not reorder groups or drop the rows where
+# Sharplight is behind: they are part of the page's argument.
+
+- id: decode-llamacpp
+  title: Single-stream generation speed against llama.cpp
   unit: tokens/s
   higher_is_better: true
-  description: Layout demonstration only. Real measurements replace this entry.
-  hardware: n/a
-  versions: n/a
-  methodology: Placeholder values to exercise the chart layout.
-  caveats: ["Not measured data."]
+  description: Tokens generated per second by one stream on the same GGUF files, right after the prompt.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; 48-thread CPU shared with other jobs.
+  versions: Sharplight develop at 282dd5b (Vulkan provider); llama.cpp b11177, official CUDA 13 and Vulkan builds, -ngl 99 -fa 1.
+  methodology: >-
+    Sharplight --bench, 3 process runs, median decode step. llama-bench -r 5. Values are medians; 128 generated tokens at
+    context depth 0 ("tg128 @d0").
+  caveats:
+    - Sharplight is 0.88-0.99x of llama.cpp CUDA on every model here, and 0.99-1.09x of llama.cpp Vulkan.
+    - The machine was shared; the engine log calls small-model decode cells noisy (Qwen3-0.6B ranged 435-597 tokens/s across runs).
+    - A later round (section 36) moved Qwen3-0.6B to 540 and Llama-3.2-1B to 478 tokens/s; this chart keeps one consistent run for all models.
+    - One GPU model. Results on other hardware will differ.
+  source: "docs/benchmarks.md section 34.2 (rows tg128 @d0)"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-15
   groups:
-    - label: Model A
-      results: [{ engine: Sharplight, value: 100 }, { engine: Reference, value: 90 }]
-    - label: Model B
-      results: [{ engine: Sharplight, value: 60 }, { engine: Reference, value: 70 }]
+    - label: Qwen3-0.6B Q8_0
+      results: [{ engine: Sharplight, value: 596 }, { engine: llama.cpp CUDA, value: 678 }, { engine: llama.cpp Vulkan, value: 576 }]
+    - label: Llama-3.2-1B Q8_0
+      results: [{ engine: Sharplight, value: 460 }, { engine: llama.cpp CUDA, value: 484 }, { engine: llama.cpp Vulkan, value: 460 }]
+    - label: Gemma-3-1B Q8_0
+      results: [{ engine: Sharplight, value: 394 }, { engine: llama.cpp CUDA, value: 406 }, { engine: llama.cpp Vulkan, value: 374 }]
+    - label: OLMoE-1B-7B Q4_K_M
+      results: [{ engine: Sharplight, value: 620 }, { engine: llama.cpp CUDA, value: 648 }, { engine: llama.cpp Vulkan, value: 573 }]
+    - label: Mistral-7B Q4_K_M
+      results: [{ engine: Sharplight, value: 155 }, { engine: llama.cpp CUDA, value: 158 }, { engine: llama.cpp Vulkan, value: 153 }]
+    - label: Qwen3-8B Q4_K_M
+      results: [{ engine: Sharplight, value: 137 }, { engine: llama.cpp CUDA, value: 144 }, { engine: llama.cpp Vulkan, value: 133 }]
+    - label: gpt-oss-20b MXFP4
+      results: [{ engine: Sharplight, value: 222 }, { engine: llama.cpp CUDA, value: 227 }, { engine: llama.cpp Vulkan, value: 220 }]
+    - label: Nemotron-3-Nano-30B Q4_K_M
+      results: [{ engine: Sharplight, value: 219 }, { engine: llama.cpp CUDA, value: 230 }, { engine: llama.cpp Vulkan, value: 201 }]
+    - label: Qwen3.8-27B Q8_0
+      results: [{ engine: Sharplight, value: 27.3 }, { engine: llama.cpp CUDA, value: 27.6 }, { engine: llama.cpp Vulkan, value: 27.5 }]
+
+- id: prefill-llamacpp
+  title: Prompt processing speed against llama.cpp CUDA
+  unit: tokens/s
+  higher_is_better: true
+  description: Prompt tokens processed per second for a 512-token prompt, same GGUF files.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; shared machine.
+  versions: Sharplight branch perf/llm-r2 on develop at 9a858ae8 (Vulkan provider); llama.cpp b11177 CUDA 13 build, -ngl 99 -fa 1.
+  methodology: >-
+    Sharplight --bench, best prefill of 4 per process, 2 process runs. The llama.cpp column is the llama-bench -r 5 median
+    measured for section 34 on the same GPU, not re-measured in this round. Both engines process the prompt in 512-token chunks.
+  caveats:
+    - Sharplight's value is a best-of, llama.cpp's is a median, and the two were measured in different rounds on a shared machine. Treat differences under about 5 % as noise.
+    - Sharplight is ahead on four models (1.04-1.22x), level on two (0.99x) and behind on gpt-oss-20b (0.86x).
+    - At 2048-token prompts the dense models are lower relative to llama.cpp (Qwen3-8B 0.93x, Llama-3.2-1B 0.93x, gpt-oss-20b 0.83x; same table).
+  source: "docs/benchmarks.md section 36.2 (rows pp512, columns after and llama.cpp CUDA)"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-15
+  groups:
+    - label: Qwen3-0.6B Q8_0
+      results: [{ engine: Sharplight, value: 60643 }, { engine: llama.cpp CUDA, value: 49578 }]
+    - label: Llama-3.2-1B Q8_0
+      results: [{ engine: Sharplight, value: 41092 }, { engine: llama.cpp CUDA, value: 41426 }]
+    - label: Gemma-3-1B Q8_0
+      results: [{ engine: Sharplight, value: 42946 }, { engine: llama.cpp CUDA, value: 37857 }]
+    - label: OLMoE-1B-7B Q4_K_M
+      results: [{ engine: Sharplight, value: 21422 }, { engine: llama.cpp CUDA, value: 20236 }]
+    - label: Mistral-7B Q4_K_M
+      results: [{ engine: Sharplight, value: 7393 }, { engine: llama.cpp CUDA, value: 7129 }]
+    - label: Qwen3-8B Q4_K_M
+      results: [{ engine: Sharplight, value: 7023 }, { engine: llama.cpp CUDA, value: 7059 }]
+    - label: gpt-oss-20b MXFP4
+      results: [{ engine: Sharplight, value: 9708 }, { engine: llama.cpp CUDA, value: 11223 }]
+
+- id: serving-throughput
+  title: Serving throughput with concurrent streams (Llama-3.2-1B)
+  unit: tokens/s
+  higher_is_better: true
+  home: true
+  chart: lines
+  description: Total output tokens per second of one server as the number of simultaneous requests grows.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; shared machine.
+  versions: Sharplight develop at 282dd5b (Vulkan provider); llama.cpp b11177 CUDA 13 llama-server; vLLM 0.33.0.
+  methodology: >-
+    One server per engine with 64 slots and 512-token contexts. Load generator sends prompts of about 250 random-word
+    tokens and reads 128 output tokens at temperature 0; 2 rounds per concurrency, median shown.
+  caveats:
+    - "The weights differ: Sharplight and llama.cpp ran the Q8_0 GGUF file, vLLM ran the bf16 Hugging Face checkpoint. The vLLM line compares batching engines, not identical work."
+    - At 64 streams vLLM is ahead (Sharplight 0.75x of vLLM).
+    - Short prompts and short answers; a workload with long prompts stresses prompt processing instead (see the time-to-first-token chart).
+    - Two rounds per point on a shared machine.
+  source: "docs/benchmarks.md section 34.3 (both tables, rows llama3.2-1b)"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-15
+  groups:
+    - label: 1 stream
+      results: [{ engine: Sharplight, value: 445 }, { engine: llama.cpp CUDA, value: 408 }, { engine: vLLM (bf16 weights), value: 271 }]
+    - label: 4 streams
+      results: [{ engine: Sharplight, value: 1539 }, { engine: llama.cpp CUDA, value: 678 }, { engine: vLLM (bf16 weights), value: 1042 }]
+    - label: 16 streams
+      results: [{ engine: Sharplight, value: 4069 }, { engine: llama.cpp CUDA, value: 1034 }, { engine: vLLM (bf16 weights), value: 3634 }]
+    - label: 64 streams
+      results: [{ engine: Sharplight, value: 6137 }, { engine: llama.cpp CUDA, value: 1397 }, { engine: vLLM (bf16 weights), value: 8192 }]
+
+- id: serving-throughput-moe
+  title: Serving throughput with concurrent streams (OLMoE-1B-7B and gpt-oss-20b)
+  unit: tokens/s
+  higher_is_better: true
+  description: The same serving test on two mixture-of-experts models.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; shared machine.
+  versions: Sharplight develop at 282dd5b (Vulkan provider); llama.cpp b11177 CUDA 13 llama-server; vLLM 0.33.0.
+  methodology: As the Llama-3.2-1B serving chart. OLMoE Q4_K_M and gpt-oss-20b MXFP4 for Sharplight and llama.cpp; vLLM ran OLMoE as a bf16 checkpoint and had no gpt-oss-20b checkpoint.
+  caveats:
+    - vLLM's OLMoE weights are bf16, not the Q4_K_M file.
+    - These models scale less from 4 to 16 streams on Sharplight than Llama-3.2-1B does; the engine log lists that as an open item.
+  source: "docs/benchmarks.md section 34.3"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-15
+  groups:
+    - label: OLMoE, 1 stream
+      results: [{ engine: Sharplight, value: 554 }, { engine: llama.cpp CUDA, value: 479 }, { engine: vLLM (bf16 weights), value: 266 }]
+    - label: OLMoE, 16 streams
+      results: [{ engine: Sharplight, value: 1415 }, { engine: llama.cpp CUDA, value: 782 }, { engine: vLLM (bf16 weights), value: 1116 }]
+    - label: OLMoE, 64 streams
+      results: [{ engine: Sharplight, value: 3051 }, { engine: llama.cpp CUDA, value: 1323 }, { engine: vLLM (bf16 weights), value: 2856 }]
+    - label: gpt-oss-20b, 1 stream
+      results: [{ engine: Sharplight, value: 216 }, { engine: llama.cpp CUDA, value: 196 }]
+    - label: gpt-oss-20b, 16 streams
+      results: [{ engine: Sharplight, value: 662 }, { engine: llama.cpp CUDA, value: 411 }]
+    - label: gpt-oss-20b, 64 streams
+      results: [{ engine: Sharplight, value: 1850 }, { engine: llama.cpp CUDA, value: 1032 }]
+
+- id: vllm-prefill
+  title: Prompt processing against vLLM on identical weights (2048-token prompt)
+  unit: tokens/s
+  higher_is_better: true
+  description: Both engines load the same Hugging Face checkpoints and process a 2048-token prompt in one pass.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; no other process on the GPU during the runs.
+  versions: Sharplight branch perf/llm-r4 on develop at 31717994 (Vulkan provider); vLLM 0.33.0 (flash-attn backend, CUDA graphs, prefix caching off).
+  methodology: >-
+    Sharplight --bench, best of 2 process runs x 4 prefills. vLLM bench/vllm_single.py, median of 5. bf16 weights, and
+    FP8 (E4M3) for the FP8 checkpoint.
+  caveats:
+    - vLLM is ahead on three of four models here (Sharplight 0.73-0.92x), level on Qwen3-0.6B (1.01x).
+    - At 8192 tokens Sharplight is at 0.73-0.90x of vLLM on all four; at 512 tokens it ranges from 0.75x (Qwen3-8B-FP8) to 1.79x (Qwen3-0.6B).
+    - Sharplight's value is a best-of, vLLM's is a median.
+  source: "docs/benchmarks.md section 39.2 (rows pp2048, columns Sharplight after and vLLM)"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-17
+  groups:
+    - label: Qwen3-0.6B bf16
+      results: [{ engine: Sharplight, value: 82870 }, { engine: vLLM, value: 82156 }]
+    - label: Llama-3.2-1B bf16
+      results: [{ engine: Sharplight, value: 48626 }, { engine: vLLM, value: 53097 }]
+    - label: Qwen3-8B bf16
+      results: [{ engine: Sharplight, value: 7101 }, { engine: vLLM, value: 8729 }]
+    - label: Qwen3-8B FP8
+      results: [{ engine: Sharplight, value: 10958 }, { engine: vLLM, value: 14967 }]
+
+- id: vllm-decode
+  title: Generation speed against vLLM on identical weights
+  unit: tokens/s
+  higher_is_better: true
+  description: Single-stream tokens per second after a 16-token prompt, same Hugging Face checkpoints.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; no other process on the GPU during the runs.
+  versions: Sharplight branch perf/llm-r4 on develop at 31717994 (Vulkan provider); vLLM 0.33.0.
+  methodology: Sharplight median decode step over 2 process runs; vLLM median of 5 ("tg@d16").
+  caveats:
+    - Level within measurement noise (1.00-1.03x). After 8192 tokens of context the range is 0.95-1.08x (same table).
+  source: "docs/benchmarks.md section 39.2 (rows tg@d16)"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-17
+  groups:
+    - label: Qwen3-0.6B bf16
+      results: [{ engine: Sharplight, value: 460 }, { engine: vLLM, value: 461 }]
+    - label: Llama-3.2-1B bf16
+      results: [{ engine: Sharplight, value: 294 }, { engine: vLLM, value: 286 }]
+    - label: Qwen3-8B bf16
+      results: [{ engine: Sharplight, value: 53 }, { engine: vLLM, value: 52 }]
+    - label: Qwen3-8B FP8
+      results: [{ engine: Sharplight, value: 89 }, { engine: vLLM, value: 87 }]
+
+- id: vllm-ttft
+  title: Time to first token against vLLM, 16 concurrent streams
+  unit: ms
+  higher_is_better: false
+  description: Median time until the first output token for 2000-token prompts with 16 requests at once. Lower is better.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; no other process on the GPU during the runs.
+  versions: Sharplight branch perf/llm-r4 on develop at 31717994 (Vulkan provider); vLLM 0.33.0.
+  methodology: >-
+    One server per engine and model with 16 slots and a 4096-token context. Load generator with 2000-token random-word
+    prompts, 16 output tokens, 3 requests per worker, 2 rounds; median of the rounds.
+  caveats:
+    - "Mixed result: Sharplight's first token arrives sooner on the two small models and later on the two 8B models."
+    - "In the same test vLLM's total throughput is higher on all four models (Sharplight 0.68-0.78x), because its prompt processing is faster."
+    - The engine log notes that the Qwen3-0.6B value comes from one pair of rounds that was not re-measured.
+  source: "docs/benchmarks.md section 39.3 (rows with 16 streams)"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-17
+  groups:
+    - label: Qwen3-0.6B bf16
+      results: [{ engine: Sharplight, value: 116 }, { engine: vLLM, value: 128 }]
+    - label: Llama-3.2-1B bf16
+      results: [{ engine: Sharplight, value: 158 }, { engine: vLLM, value: 204 }]
+    - label: Qwen3-8B bf16
+      results: [{ engine: Sharplight, value: 795 }, { engine: vLLM, value: 726 }]
+    - label: Qwen3-8B FP8
+      results: [{ engine: Sharplight, value: 534 }, { engine: vLLM, value: 493 }]
+
+- id: onnx-latency
+  title: ONNX model latency against onnxruntime and TensorRT (batch 1)
+  unit: ms
+  higher_is_better: false
+  description: Minimum wall-clock latency of one inference at batch size 1. Lower is better.
+  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2.
+  versions: Sharplight develop, 2026-11-15 (Vulkan provider); onnxruntime-gpu 1.32 with the CUDA execution provider (TF32 on, its default) and the TensorRT execution provider (engine build time excluded).
+  methodology: >-
+    Minimum over rounds of each process's minimum of N runs. "Sharplight (fast)" is the opt-in reduced matrix precision
+    mode, comparable to onnxruntime's default TF32; "Sharplight (strict)" is the default, f32-accurate mode.
+  caveats:
+    - Minimum latency, not mean or percentile; it shows the best case for every engine.
+    - Like for like is fast against "onnxruntime CUDA" (both TF32 class), and strict against onnxruntime with TF32 off (not charted; Sharplight strict is ahead on every row but phi-3.5, see the source table).
+    - TensorRT is ahead on ConvNeXt-tiny, YOLOv10n and MobileSAM here, and on several batch-8 rows in the source table.
+    - On phi-3.5-mini Sharplight is slightly behind onnxruntime CUDA (4.71 against 4.54 ms).
+    - TensorRT was not measured for the two language-model rows.
+  source: "docs/benchmarks.md section 37.2 (batch 1 rows; SL strict and SL fast after values)"
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
+  date: 2026-11-15
+  groups:
+    - label: resnet50
+      results: [{ engine: Sharplight (fast), value: 0.53 }, { engine: Sharplight (strict), value: 0.71 }, { engine: onnxruntime CUDA, value: 1.18 }, { engine: TensorRT, value: 1.06 }]
+    - label: convnext-tiny
+      results: [{ engine: Sharplight (fast), value: 0.99 }, { engine: Sharplight (strict), value: 1.39 }, { engine: onnxruntime CUDA, value: 1.47 }, { engine: TensorRT, value: 0.72 }]
+    - label: yolov10n
+      results: [{ engine: Sharplight (fast), value: 0.82 }, { engine: Sharplight (strict), value: 0.98 }, { engine: onnxruntime CUDA, value: 1.72 }, { engine: TensorRT, value: 0.72 }]
+    - label: bert-base (16 tokens)
+      results: [{ engine: Sharplight (fast), value: 0.96 }, { engine: Sharplight (strict), value: 1.33 }, { engine: onnxruntime CUDA, value: 1.87 }, { engine: TensorRT, value: 1.20 }]
+    - label: vit-base
+      results: [{ engine: Sharplight (fast), value: 1.42 }, { engine: Sharplight (strict), value: 2.76 }, { engine: onnxruntime CUDA, value: 1.61 }, { engine: TensorRT, value: 2.26 }]
+    - label: whisper-tiny encoder
+      results: [{ engine: Sharplight (fast), value: 1.25 }, { engine: Sharplight (strict), value: 1.95 }, { engine: onnxruntime CUDA, value: 1.89 }, { engine: TensorRT, value: 1.56 }]
+    - label: mobilesam encoder
+      results: [{ engine: Sharplight (fast), value: 5.99 }, { engine: Sharplight (strict), value: 7.55 }, { engine: onnxruntime CUDA, value: 9.64 }, { engine: TensorRT, value: 4.55 }]
+    - label: phi-3.5-mini q4f16 (decode step)
+      results: [{ engine: Sharplight (fast), value: 4.71 }, { engine: Sharplight (strict), value: 4.70 }, { engine: onnxruntime CUDA, value: 4.54 }]
+    - label: qwen2.5-0.5b q4 (decode step)
+      results: [{ engine: Sharplight (fast), value: 3.48 }, { engine: Sharplight (strict), value: 3.49 }, { engine: onnxruntime CUDA, value: 6.03 }]

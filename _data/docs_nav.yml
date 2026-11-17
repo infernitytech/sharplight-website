@@ -1,6 +1,30 @@
-# Sidebar of the docs section. `url` is the page URL below /docs/ (without baseurl).
+# Sidebar of the docs section. `url` is the page URL (without baseurl). Structure: _strategy/sitemap.md section 2.
 - title: Getting started
   items:
     - { title: Overview, url: /docs/ }
-    - { title: Install Studio, url: /docs/install/ }
-    - { title: First steps, url: /docs/first-steps/ }
+    - { title: Install the packages, url: /docs/getting-started/ }
+    - { title: First text generation, url: /docs/text-generation/ }
+- title: Concepts
+  items:
+    - { title: How Sharplight is put together, url: /docs/concepts/ }
+    - { title: Model formats and .slm packages, url: /docs/model-formats/ }
+    - { title: Hardware and providers, url: /docs/hardware/ }
+- title: Task guides
+  items:
+    - { title: "Chat, tools and structured output", url: /docs/chat/ }
+    - { title: Embeddings and reranking, url: /docs/embeddings/ }
+    - { title: Speech, url: /docs/speech/ }
+    - { title: Image generation, url: /docs/image-generation/ }
+    - { title: Video generation, url: /docs/video-generation/ }
+    - { title: Vision, url: /docs/vision/ }
+- title: Serving
+  items:
+    - { title: Serve an OpenAI-compatible endpoint, url: /docs/serving/ }
+- title: Studio
+  items:
+    - { title: Studio basics, url: /docs/studio/ }
+- title: Reference
+  items:
+    - { title: Model compatibility, url: /docs/compatibility/ }
+    - { title: Benchmark methodology, url: /docs/benchmark-methodology/ }
+    - { title: API reference, url: /docs/api-reference/ }

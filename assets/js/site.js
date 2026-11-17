@@ -77,130 +77,123 @@
     qi.addEventListener('keydown', function (e) { if (e.key === 'Escape') { res.hidden = true; qi.blur(); } });
   }
 
-  // ---- Studio download: platform detection, feeds ----
-  var dlData = (function () { try { return JSON.parse($('#sl-downloads').textContent); } catch (e) { return null; } })();
-  if (!dlData) return;
-  var plats = {}; dlData.platforms.forEach(function (p) { plats[p.rid] = p; });
-  var state = { rid: null, fmt: null, channel: 'unstable', detected: null, note: '' };
-  var versions = {};
+  // ---- Studio download: platform detection (spec: _strategy/download-spec.md); data comes from the server-rendered tables ----
+  var boxes = $$('[data-dl], [data-dl-compact]');
+  if (!boxes.length) return;
+  var qp = new URLSearchParams(location.search);
 
-  function fileUrl(rid, fmtId, channel) {
-    var p = plats[rid]; var f = p.formats.filter(function (x) { return x.id === fmtId; })[0] || p.formats[0];
-    var name = f.file.replace('{pack}', dlData.pack_id).replace('{rid}', rid).replace('{channel}', channel);
-    return { url: dlData.base + '/' + name, name: name, fmt: f };
-  }
-  function detect() {
-    var ua = navigator.userAgent || '', pl = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
-    var os = /Win/i.test(pl + ua) ? 'win' : /Mac/i.test(pl) || /Macintosh/.test(ua) ? 'mac' : /Android|iPhone|iPad/.test(ua) ? 'mobile' : /Linux|X11|CrOS/i.test(pl + ua) ? 'linux' : null;
-    var arm = /aarch64|arm64|ARM64/i.test(ua + pl);
-    var r = { os: os, rid: null, note: '' };
-    if (os === 'mac') { r.rid = 'osx-arm64'; r.note = dlData.notes.osx_intel; }
-    else if (os === 'win') r.rid = arm ? 'win-arm64' : 'win-x64';
-    else if (os === 'linux') r.rid = arm ? 'linux-arm64' : 'linux-x64';
-    else if (os === 'mobile') r.note = 'Studio is a desktop app. Open this page on a computer to download it.';
+  function detectBasic() {
+    var ua = navigator.userAgent || '', pl = navigator.platform || '', r = { os: null, rid: null, conf: 'none', note: null };
+    var arm = /aarch64|arm64/i.test(ua + ' ' + pl);
+    if (/Android|iPhone|iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) { r.os = 'mobile'; r.note = 'mobile'; r.conf = 'ua'; }
+    else if (/Windows/.test(ua)) { r.os = 'win'; r.rid = arm ? 'win-arm64' : 'win-x64'; r.conf = 'ua'; r.note = arm ? null : 'assume_win_x64'; }
+    else if (/Macintosh|Mac OS X/.test(ua)) { r.os = 'mac'; r.rid = 'osx-arm64'; r.conf = 'ua'; r.note = 'assume_mac'; }
+    else if (/CrOS/.test(ua)) { r.os = 'linux'; r.rid = arm ? 'linux-arm64' : 'linux-x64'; r.conf = 'ua'; r.note = 'chromeos'; }
+    else if (/Linux|X11/.test(ua)) { r.os = 'linux'; r.rid = arm ? 'linux-arm64' : 'linux-x64'; r.conf = 'ua'; }
     return r;
   }
-  function refine(r) {
-    var uad = navigator.userAgentData;
-    if (!uad || !uad.getHighEntropyValues || (r.os !== 'win' && r.os !== 'linux')) return Promise.resolve(r);
-    return uad.getHighEntropyValues(['architecture', 'bitness']).then(function (v) {
-      var arm = /arm/i.test(v.architecture || '');
-      if (r.os === 'win') r.rid = arm ? 'win-arm64' : 'win-x64';
-      if (r.os === 'linux') r.rid = arm ? 'linux-arm64' : 'linux-x64';
-      return r;
-    }, function () { return r; });
+  function webglRenderer() {
+    try {
+      var c = document.createElement('canvas'), g = c.getContext('webgl'), e = g && g.getExtension('WEBGL_debug_renderer_info');
+      return e ? String(g.getParameter(e.UNMASKED_RENDERER_WEBGL)) : '';
+    } catch (x) { return ''; }
   }
-  function ver(a, b) {
-    var pa = String(a).split(/[.\-+]/), pb = String(b).split(/[.\-+]/);
-    for (var i = 0; i < Math.max(pa.length, pb.length); i++) {
-      var x = pa[i] === undefined ? '' : pa[i], y = pb[i] === undefined ? '' : pb[i];
-      var nx = /^\d+$/.test(x), ny = /^\d+$/.test(y);
-      if (nx && ny) { if (+x !== +y) return +x - +y; } else if (x !== y) return x < y ? -1 : 1;
+  function detect() {
+    var r = detectBasic(), uad = navigator.userAgentData;
+    var done = function (res) {
+      if (res.os === 'mac') { var gl = webglRenderer(); if (/Intel|AMD Radeon/i.test(gl)) { res.rid = null; res.note = 'intel_mac'; } }
+      return res;
+    };
+    if (!uad || !uad.getHighEntropyValues) return Promise.resolve(done(r));
+    return uad.getHighEntropyValues(['architecture', 'bitness', 'platform']).then(function (v) {
+      var p = v.platform || uad.platform || '', a = (v.architecture || '').toLowerCase(), bits = v.bitness;
+      var res = { os: null, rid: null, conf: 'hint', note: null };
+      if (/Android|iOS/.test(p)) { res.os = 'mobile'; res.note = 'mobile'; }
+      else if (bits === '32') { res.os = 'other'; res.note = 'bits32'; }
+      else if (p === 'Windows') { res.os = 'win'; res.rid = a === 'arm' ? 'win-arm64' : 'win-x64'; }
+      else if (p === 'macOS') { res.os = 'mac'; if (a === 'x86') { res.note = 'intel_mac'; } else { res.rid = 'osx-arm64'; } }
+      else if (p === 'Linux' || p === 'Chrome OS') { res.os = 'linux'; res.rid = a === 'arm' ? 'linux-arm64' : 'linux-x64'; if (p === 'Chrome OS') res.note = 'chromeos'; }
+      else return done(r);
+      return res;
+    }, function () { return done(r); });
+  }
+
+  boxes.forEach(function (box) {
+    var compact = box.hasAttribute('data-dl-compact');
+    var root = compact ? document : box;
+    var btn = $('[data-dl-button]', box), meta = $('[data-dl-meta]', box);
+    var strings = {};
+    var channel = box.getAttribute('data-default-channel');
+    if (qp.get('channel') === 'unstable' || qp.get('channel') === 'stable') channel = qp.get('channel');
+    var state = { rid: null, channel: channel, det: null };
+    var tables = compact ? [] : $$('.dl-matrix', box);
+    var radios = compact ? [] : $$('input[name=dl-channel]', box);
+    var live = compact ? null : $('[data-dl-live]', box);
+    var assume = compact ? null : $('[data-dl-assume]', box);
+    var notes = {
+      assume_mac: 'Detected macOS. Studio needs an Apple silicon Mac (M1 or later).',
+      assume_win_x64: 'Detected Windows (x64). On a Windows ARM device, choose Windows (ARM64).',
+      intel_mac: 'Intel Macs are not supported. Studio needs an Apple silicon Mac (M1 or later).',
+      bits32: 'Sharplight Studio needs a 64-bit system.',
+      chromeos: 'For the Linux development environment on ChromeOS.',
+      mobile: 'Sharplight Studio is a desktop app for Windows, macOS and Linux. Open this page on your computer to download it.'
+    };
+    function rowFor(rid, ch) {
+      // compact widgets read the full table of the download page when present; otherwise build the link from data-base
+      var t = tables.filter(function (x) { return x.getAttribute('data-channel') === ch; })[0];
+      return t ? $$('tr[data-rid]', t).filter(function (r) { return r.getAttribute('data-rid') === rid; })[0] : null;
     }
-    return 0;
-  }
-  function latestFrom(feed) {
-    var best = null;
-    (feed.Assets || feed.assets || []).forEach(function (a) {
-      if ((a.Type || a.type) !== 'Full') return;
-      var v = a.Version || a.version;
-      if (!best || ver(v, best) > 0) best = v;
-    });
-    return best;
-  }
-  function loadVersion(rid, channel) {
-    var key = rid + '-' + channel;
-    if (versions[key] !== undefined) return Promise.resolve(versions[key]);
-    var live = dlData.base + '/releases.' + key + '.json';
-    var fallback = base + '/assets/data/latest.json';
-    return fetch(live, { cache: 'no-cache' }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
-      .then(function (j) { return (versions[key] = latestFrom(j)); })
-      .catch(function () {
-        // CORS or network: use the build-time snapshot of the feeds
-        return fetch(fallback).then(function (r) { return r.json(); }).then(function (j) {
-          return (versions[key] = (j.versions && j.versions[key]) || null);
-        }).catch(function () { return (versions[key] = null); });
+    var files = {
+      'win-x64': ['Windows', '{p}-win-x64-{c}-Setup.exe'], 'win-arm64': ['Windows (ARM64)', '{p}-win-arm64-{c}-Setup.exe'],
+      'osx-arm64': ['macOS', '{p}-osx-arm64-{c}-Setup.pkg'], 'linux-x64': ['Linux', '{p}-linux-x64-{c}.AppImage'], 'linux-arm64': ['Linux (ARM64)', '{p}-linux-arm64-{c}.AppImage']
+    };
+    function render() {
+      if (state.det && state.det.note && !state.rid) {
+        btn.textContent = state.det.note === 'mobile' ? 'See all downloads' : btn.textContent;
+      }
+      if (!state.rid) { if (assume && state.det && state.det.note) assume.textContent = notes[state.det.note] || ''; return; }
+      if (compact) {
+        var f = files[state.rid], base = box.getAttribute('data-base');
+        btn.href = base + '/' + f[1].replace('{p}', 'SharplightStudio').replace('{c}', state.channel);
+        btn.textContent = 'Download for ' + f[0];
+        meta.textContent = state.det && state.det.note && notes[state.det.note] ? notes[state.det.note] : '';
+        return;
+      }
+      var row = rowFor(state.rid, state.channel);
+      if (!row) return;
+      btn.href = row.getAttribute('data-url');
+      btn.textContent = 'Download for ' + row.getAttribute('data-label');
+      meta.textContent = row.getAttribute('data-meta');
+      if (assume) assume.textContent = state.det && state.det.rid === state.rid && state.det.note ? (notes[state.det.note] || '') : '';
+      $$('tr[data-rid]', box).forEach(function (r) {
+        var b = $('[data-detected-badge]', r); if (b) b.hidden = !(state.det && state.det.rid === r.getAttribute('data-rid'));
       });
-  }
-  function verText(v) { return v ? 'Version ' + v : 'Latest version'; }
-
-  // compact widgets
-  var widgets = $$('[data-dl-widget]');
-  var full = $('[data-dl-full]');
-  function renderWidgets() {
-    widgets.forEach(function (w) {
-      var btn = $('[data-dl-primary]', w), meta = $('[data-dl-meta]', w);
-      if (!state.rid) return;
-      var f = fileUrl(state.rid, null, state.channel);
-      btn.href = f.url; btn.textContent = 'Download for ' + plats[state.rid].label.replace(/ \(.*\)/, '');
-      loadVersion(state.rid, state.channel).then(function (v) {
-        meta.textContent = verText(v) + ' · ' + plats[state.rid].label + ' · ' + f.fmt.label;
+      if (live) live.textContent = 'Selected: ' + btn.textContent;
+      var un = $('[data-dl-unsigned]', box); if (un) un.hidden = !/^(win|osx)/.test(state.rid);
+      tables.forEach(function (t) {
+        var on = t.getAttribute('data-channel') === state.channel;
+        if (t.tagName === 'DETAILS') t.open = on;
       });
-    });
-  }
-  function renderFull() {
-    if (!full) return;
-    var rid = state.rid, p = plats[rid], f = fileUrl(rid, state.fmt, state.channel);
-    state.fmt = f.fmt.id;
-    var sel = $('[data-dl-platform]', full), fm = $('[data-dl-format]', full);
-    sel.value = rid;
-    fm.innerHTML = p.formats.map(function (x) { return '<option value="' + x.id + '">' + x.label + '</option>'; }).join('');
-    fm.value = state.fmt;
-    var big = $('[data-dl-big]', full);
-    big.href = f.url; big.textContent = 'Download ' + f.fmt.label;
-    $('[data-dl-file]', full).textContent = f.name;
-    $('[data-dl-detected]', full).textContent = state.detected ? 'We detected: ' + plats[state.detected].label + '.' : 'Choose your platform below.';
-    $('[data-dl-note]', full).textContent = state.note; $('[data-dl-note]', full).hidden = !state.note;
-    $$('[data-dl-channel] button', full).forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.ch === state.channel); });
-    $('[data-dl-unstable]', full).hidden = state.channel !== 'unstable';
-    var vEl = $('[data-dl-version]', full); vEl.textContent = 'Checking latest version…';
-    loadVersion(rid, state.channel).then(function (v) {
-      vEl.textContent = v ? 'Latest ' + state.channel + ' version: ' + v : 'Latest ' + state.channel + ' version: see the release notes (version info could not be loaded).';
-    });
-    var tbl = $('[data-dl-all]', full);
-    if (tbl && !tbl.dataset.done) {
-      tbl.dataset.done = 1;
-      tbl.innerHTML = dlData.platforms.map(function (pp) {
-        return '<tr><td>' + pp.label + '</td><td>' + pp.formats.map(function (ff) {
-          return '<a href="' + fileUrl(pp.rid, ff.id, '__CH__').url + '" data-ch-link>' + ff.label + '</a>';
-        }).join(' · ') + '</td></tr>';
-      }).join('');
+      var p = new URLSearchParams(location.search);
+      p.set('rid', state.rid); if (state.channel !== box.getAttribute('data-default-channel')) p.set('channel', state.channel); else p.delete('channel');
+      history.replaceState(null, '', location.pathname + '?' + p + location.hash);
     }
-    $$('[data-ch-link]', full).forEach(function (a) { a.href = a.href.replace('__CH__', state.channel).replace(/(win|osx|linux)-(x64|arm64)-(stable|unstable)/, '$1-$2-' + state.channel); });
-  }
-  function render() { renderWidgets(); renderFull(); }
-
-  var d = detect();
-  state.detected = d.rid; state.note = d.note;
-  state.rid = d.rid || 'win-x64';
-  render();
-  refine(d).then(function (r) { if (r.rid && r.rid !== state.rid) { state.rid = state.detected = r.rid; state.fmt = null; render(); } });
-
-  if (full) {
-    $('[data-dl-platform]', full).innerHTML = dlData.platforms.map(function (p) { return '<option value="' + p.rid + '">' + p.label + '</option>'; }).join('');
-    $('[data-dl-platform]', full).addEventListener('change', function (e) { state.rid = e.target.value; state.fmt = null; state.note = state.rid === 'osx-arm64' ? dlData.notes.osx_intel : ''; render(); });
-    $('[data-dl-format]', full).addEventListener('change', function (e) { state.fmt = e.target.value; render(); });
-    $$('[data-dl-channel] button', full).forEach(function (b) { b.addEventListener('click', function () { state.channel = b.dataset.ch; render(); }); });
-    render();
-  }
+    if (!compact) {
+      // clicking a row selects it
+      $$('tr[data-rid]', box).forEach(function (r) {
+        r.addEventListener('click', function (e) {
+          if (e.target.closest('a')) return;
+          state.rid = r.getAttribute('data-rid'); state.channel = r.closest('.dl-matrix').getAttribute('data-channel'); render();
+        });
+        var th = $('th', r); th.style.cursor = 'pointer'; th.title = 'Select this system';
+      });
+      radios.forEach(function (rd) { rd.addEventListener('change', function () { state.channel = rd.value; render(); }); });
+      var nb = $('[data-dl-notyours]', box);
+      if (nb) nb.addEventListener('click', function () { var m = $('.dl-matrix', box); if (m) m.scrollIntoView({ behavior: 'smooth' }); });
+    }
+    // channel from the URL must exist as a rendered table
+    var explicit = qp.get('rid');
+    if (explicit && files[explicit]) { state.rid = explicit; render(); return; }
+    detect().then(function (d) { state.det = d; state.rid = d.rid; render(); });
+  });
 })();

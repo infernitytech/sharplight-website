@@ -1,4 +1,0 @@
----
-title: First steps
----
-Placeholder.

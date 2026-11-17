@@ -1,0 +1,52 @@
+{%- assign b = site.data.benchmarks | where: "id", include.id | first -%}
+{%- if b -%}
+{%- assign max = 0.0 -%}
+{%- assign engines = "" | split: "" -%}
+{%- for g in b.groups %}{% for r in g.results %}{% if r.value > max %}{% assign max = r.value | times: 1.0 %}{% endif %}{% unless engines contains r.engine %}{% assign engines = engines | push: r.engine %}{% endunless %}{% endfor %}{% endfor -%}
+<figure class="chart" id="{{ b.id }}">
+  <figcaption>
+    <h3><a class="plain" href="#{{ b.id }}">{{ b.title }}</a></h3>
+    <p class="muted">{{ b.description }} <strong>{{ b.unit }}; {% if b.higher_is_better %}higher{% else %}lower{% endif %} is better. Axis starts at zero.</strong></p>
+  </figcaption>
+  <ul class="legend" aria-label="Engines">
+    {%- for e in engines %}{% include benchmark-class.html engine=e %}<li><i class="{{ ecls }}"></i>{{ e }}</li>{% endfor %}
+  </ul>
+  {%- if b.chart == "lines" %}
+  {%- assign n = b.groups | size -%}
+  <svg class="line-chart" viewBox="0 0 680 320" role="img" aria-label="{{ b.title }}. Values are in the table below.">
+    {%- for t in (0..4) %}{% assign yv = max | times: t | divided_by: 4.0 %}{% assign off = t | times: 55.0 %}{% assign yy = 270.0 | minus: off %}
+    <line class="grid" x1="70" x2="660" y1="{{ yy }}" y2="{{ yy }}"/><text class="axis" x="62" y="{{ yy | plus: 4 }}" text-anchor="end">{{ yv | round }}</text>{% endfor %}
+    {%- for g in b.groups %}{% assign gstep = 590.0 | divided_by: n %}{% assign xx = gstep | times: forloop.index0 | plus: 100.0 %}
+    <text class="axis" x="{{ xx }}" y="296" text-anchor="middle">{{ g.label }}</text>{% endfor %}
+    {%- assign step = 590.0 | divided_by: n -%}
+    {%- for e in engines %}{% include benchmark-class.html engine=e %}
+    {%- capture pts %}{% for g in b.groups %}{% for r in g.results %}{% if r.engine == e %}{% assign px = step | times: forloop.parentloop.index0 | plus: 100.0 | round: 1 %}{% assign py = r.value | times: 220.0 | divided_by: max %}{% assign py = 270.0 | minus: py | round: 1 %}{{ px }},{{ py }} {% endif %}{% endfor %}{% endfor %}{% endcapture %}
+    <polyline class="series {{ ecls }}" points="{{ pts | strip }}"/>
+    {%- for g in b.groups %}{% for r in g.results %}{% if r.engine == e %}{% assign px = step | times: forloop.parentloop.index0 | plus: 100.0 | round: 1 %}{% assign py = r.value | times: 220.0 | divided_by: max %}{% assign py = 270.0 | minus: py | round: 1 %}<circle class="dot {{ ecls }}" cx="{{ px }}" cy="{{ py }}" r="4"/>{% endif %}{% endfor %}{% endfor %}
+    {%- endfor %}
+  </svg>
+  {%- else %}
+  <div class="bars">
+  {%- for g in b.groups %}
+    <div class="bar-group"><div class="glabel">{{ g.label }}</div>
+    {%- for r in g.results %}{% include benchmark-class.html engine=r.engine %}
+      <div class="bar-row"><span>{{ r.engine }}</span><span class="bar-track"><span class="bar-fill {{ ecls }}" style="width:{{ r.value | times: 100.0 | divided_by: max }}%"></span></span><span class="bar-val">{{ r.value }}</span></div>
+    {%- endfor %}
+    {%- if g.note %}<p class="small muted">{{ g.note }}</p>{% endif %}
+    </div>
+  {%- endfor %}
+  </div>
+  {%- endif %}
+  <details class="more"><summary>Show as table</summary>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="{{ b.title }} as a table"><table class="table">
+      <caption class="sr">{{ b.title }} ({{ b.unit }})</caption>
+      <thead><tr><th scope="col">{% if b.chart == "lines" %}Load{% else %}Case{% endif %}</th>{% for e in engines %}<th scope="col">{{ e }}</th>{% endfor %}</tr></thead>
+      <tbody>{% for g in b.groups %}<tr><th scope="row">{{ g.label }}</th>{% for e in engines %}<td class="num">{% for r in g.results %}{% if r.engine == e %}{{ r.value }}{% endif %}{% endfor %}</td>{% endfor %}</tr>{% endfor %}</tbody>
+    </table></div>
+  </details>
+  <p class="meta-line small"><strong>Hardware:</strong> {{ b.hardware }}<br><strong>Versions:</strong> {{ b.versions }}{% if b.date %}<br><strong>Date:</strong> {{ b.date }}{% endif %}</p>
+  <details class="more"><summary>Method</summary><p class="small">{{ b.methodology }}</p></details>
+  <div class="caveats"><strong>Caveats</strong><ul>{% for c in b.caveats %}<li>{{ c }}</li>{% endfor %}</ul></div>
+  {%- if b.source %}<p class="small muted">Source: {% if b.source_url %}<a href="{{ b.source_url }}">{{ b.source }}</a>{% else %}{{ b.source }}{% endif %}</p>{% endif %}
+</figure>
+{%- endif -%}

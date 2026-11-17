@@ -1,0 +1,41 @@
+{%- assign cat = site.data.verified_models -%}
+{%- assign level_names = "verified:Verified,verified-tiny:Verified (tiny),loads:Loads,partial:Partial" | split: "," -%}
+<div class="models" data-models>
+  <form class="filters" role="search" onsubmit="return false" aria-label="Filter the model list">
+    <div><label class="small" for="m-q">Search</label><br><input id="m-q" type="search" data-f="q" placeholder="Name, family, tag"></div>
+    <div><label class="small" for="m-k">Task</label><br><select id="m-k" data-f="kind"><option value="">All tasks ({{ cat.entries | size }})</option>
+      {%- for k in site.data.kinds %}{% assign n = cat.entries | where: "kind", k.id | size %}{% if n > 0 %}<option value="{{ k.id }}">{{ k.label }} ({{ n }})</option>{% endif %}{% endfor -%}</select></div>
+    <div><label class="small" for="m-l">Level</label><br><select id="m-l" data-f="level"><option value="">All levels</option>
+      {%- for l in level_names %}{% assign p = l | split: ":" %}<option value="{{ p[0] }}">{{ p[1] }}</option>{% endfor -%}</select></div>
+    <div><label class="small" for="m-f">Format</label><br><select id="m-f" data-f="format"><option value="">All formats</option>
+      {%- assign all_fmts = "" | split: "" -%}{%- for e in cat.entries %}{%- for v in e.variants %}{% assign all_fmts = all_fmts | push: v.format %}{% endfor %}{% endfor -%}
+      {%- for f in all_fmts | uniq | sort %}<option>{{ f }}</option>{% endfor -%}</select></div>
+    <div><label class="small" for="m-p">Provider</label><br><select id="m-p" data-f="provider"><option value="">Any provider</option><option>CPU</option><option>Vulkan</option></select></div>
+    <div><label class="small" for="m-lic">License</label><br><select id="m-lic" data-f="license"><option value="">All licenses</option>
+      {%- assign lics = "" | split: "" -%}{%- for e in cat.entries %}{% assign lics = lics | push: e.license %}{% endfor -%}
+      {%- for l in lics | uniq | sort %}{% if l %}<option>{{ l }}</option>{% endif %}{% endfor %}<option value="unspecified">unspecified</option></select></div>
+  </form>
+  <p class="muted" data-m-count aria-live="polite">{{ cat.entries | size }} models</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Verified models">
+  <table class="table models-table">
+    <caption class="sr">Verified models, catalog of {{ cat.updated }}</caption>
+    <thead><tr><th scope="col">Model</th><th scope="col">Task</th><th scope="col">Variants</th><th scope="col">License</th><th scope="col">Verification</th><th scope="col">Hub</th></tr></thead>
+    <tbody>
+    {%- for e in cat.entries %}
+      {%- assign fmt_list = e.variants | map: "format" | uniq -%}
+      {%- assign lvl = e.level -%}
+      <tr id="{{ e.id }}" data-kind="{{ e.kind }}" data-level="{{ e.level }}" data-formats="{{ fmt_list | join: ' ' }}" data-license="{{ e.license | default: 'unspecified' }}" data-providers="{{ e.verification.providers | join: ' ' }}" data-q="{{ e.name | append: ' ' | append: e.family | append: ' ' | append: e.id | append: ' ' | append: e.tags | downcase }}">
+        <th scope="row"><a href="#{{ e.id }}" class="plain">{{ e.name }}</a>{% if e.gated %} <span class="pill">gated</span>{% endif %}<br><span class="muted small">{{ e.family }}</span></th>
+        <td>{% for k in site.data.kinds %}{% if k.id == e.kind %}{{ k.label }}{% endif %}{% endfor %}</td>
+        <td>{% for v in e.variants limit: 6 %}<span class="pill">{{ v.label }}</span>{% endfor %}{% if e.variants.size > 6 %}<span class="muted small">+{{ e.variants.size | minus: 6 }} more</span>{% endif %}</td>
+        <td>{{ e.license | default: "unspecified" }}</td>
+        <td><span class="badge lvl-{{ e.level }}">{% for l in level_names %}{% assign p = l | split: ":" %}{% if p[0] == e.level %}{{ p[1] }}{% endif %}{% endfor %}</span>
+          <br>{{ e.verification.summary }}{% if e.verification.providers %}<br><span class="muted small">{{ e.verification.providers | join: ", " }}{% if e.verification.date %} · {{ e.verification.date }}{% endif %}</span>{% endif %}</td>
+        <td>{% assign seen = "" | split: "" %}{% for v in e.variants %}{% unless seen contains v.repository %}{% assign seen = seen | push: v.repository %}{% if seen.size <= 3 %}<a href="https://huggingface.co/{{ v.repository }}{% if v.revision %}/tree/{{ v.revision }}{% endif %}" rel="noopener">{{ v.repository }}</a><br>{% endif %}{% endunless %}{% endfor %}</td>
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="notice" data-m-empty hidden>No verified model matches these filters. That does not mean a model will not work: it has not been tried yet.</p>
+</div>

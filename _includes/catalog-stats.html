@@ -1,0 +1,19 @@
+{%- comment -%}Sets catalog counts from _data/verified_models.json for use in page copy.{%- endcomment -%}
+{%- assign cat = site.data.verified_models -%}
+{%- assign cat_total = cat.entries | size -%}
+{%- assign cat_updated = cat.updated -%}
+{%- assign cat_verified = cat.entries | where: "level", "verified" | size -%}
+{%- assign cat_partial = cat.entries | where: "level", "partial" | size -%}
+{%- assign cat_loads = cat.entries | where: "level", "loads" | size -%}
+{%- assign cat_tiny = cat.entries | where: "level", "verified-tiny" | size -%}
+{%- assign cat_kinds = cat.entries | map: "kind" | uniq | size -%}
+{%- assign n_text = cat.entries | where: "kind", "text-generation" | size -%}
+{%- assign n_emb = cat.entries | where: "kind", "embeddings" | size -%}
+{%- assign n_stt = cat.entries | where: "kind", "speech-recognition" | size -%}
+{%- assign n_tts = cat.entries | where: "kind", "speech-synthesis" | size -%}
+{%- assign n_img = cat.entries | where: "kind", "image-generation" | size -%}
+{%- assign n_vid = cat.entries | where: "kind", "video-generation" | size -%}
+{%- assign vision_kinds = "image-classification,image-embedding,object-detection,image-segmentation,image-segmentation-semantic,depth-estimation,ocr,image-upscaling" | split: "," -%}
+{%- assign n_vision = 0 -%}{%- for k in vision_kinds -%}{%- assign c = cat.entries | where: "kind", k | size -%}{%- assign n_vision = n_vision | plus: c -%}{%- endfor -%}
+{%- assign audio_kinds = "audio-codec,voice-activity" | split: "," -%}
+{%- assign n_audio = 0 -%}{%- for k in audio_kinds -%}{%- assign c = cat.entries | where: "kind", k | size -%}{%- assign n_audio = n_audio | plus: c -%}{%- endfor -%}

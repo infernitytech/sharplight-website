@@ -1,5 +1,48 @@
-<div class="dl-widget" data-dl-widget>
-  <a class="btn btn-big" data-dl-primary href="{{ '/download/' | relative_url }}">Download Studio</a>
-  <p class="muted small" data-dl-meta>Free and open source · Windows, macOS, Linux</p>
-  <p class="small"><a href="{{ '/download/' | relative_url }}">All platforms and channels</a></p>
+{%- assign dp = site.pages | where: "path", "download.md" | first -%}
+{%- assign s = dp.strings -%}
+{%- assign d = site.data.downloads -%}
+{%- assign rel = site.data.studio_releases -%}
+{%- assign ph_c = '{c}' -%}{%- assign ph_v = '{version}' -%}{%- assign ph_s = '{size}' -%}{%- assign ph_ch = '{channel}' -%}
+{%- assign default_ch = "unstable" -%}{%- if d.stable_available -%}{%- assign default_ch = "stable" -%}{%- endif -%}
+<div class="dl-box" data-dl data-default-channel="{{ default_ch }}" data-base="{{ d.base }}">
+  <div class="dl-primary">
+    <a class="btn btn-big" data-dl-button href="#dl-matrix">{{ s.button_neutral }}</a>
+    <p class="muted small" data-dl-meta></p>
+    <p class="small" data-dl-assume></p>
+    <p class="small"><a href="#dl-matrix" data-dl-notyours>{{ s.not_yours }}</a></p>
+    <p class="sr" aria-live="polite" data-dl-live></p>
+  </div>
+  {%- if d.stable_available %}
+  <fieldset class="dl-channels"><legend class="small">Channel</legend>
+    {%- for c in d.channels %}<label><input type="radio" name="dl-channel" value="{{ c.id }}"{% if c.id == default_ch %} checked{% endif %}> {{ c.label }}</label>{% endfor %}
+  </fieldset>
+  {%- else %}
+  <p class="small muted">{{ s.no_stable }}</p>
+  {%- endif %}
+  <p class="small muted">{{ s.channel_preview_note }} {{ s.channel_switch_note }}</p>
+  {%- for c in d.channels %}
+  {%- if c.id == default_ch %}<div id="dl-matrix" class="dl-matrix" data-channel="{{ c.id }}">{% else %}<details class="dl-matrix" data-channel="{{ c.id }}"{% if c.id == "stable" and d.stable_available == false %} hidden{% endif %}><summary>{{ c.label }} downloads</summary>{% endif %}
+    <table class="table">
+      <caption class="sr">{{ c.label }} downloads</caption>
+      <thead><tr><th scope="col">System</th><th scope="col">{{ s.col_installer }}</th><th scope="col">{{ s.col_portable }}</th></tr></thead>
+      <tbody>
+      {%- for p in d.platforms %}
+        {%- assign key = p.rid | append: "-" | append: c.id -%}
+        {%- assign r = rel[key] -%}
+        {%- capture file %}{{ p.primary.file | replace: ph_c, c.id }}{% endcapture -%}
+        {%- assign size_text = "" -%}{%- if r.size %}{%- assign mb = r.size | divided_by: 1048576 -%}{%- capture size_text %}{{ mb }} MB{% endcapture -%}{%- endif -%}
+        {%- capture meta %}{% if r %}{{ s.meta | replace: ph_v, r.version | replace: ph_s, size_text | replace: ph_ch, c.label }}{% else %}{{ c.label }}: not available yet{% endif %}{% endcapture %}
+        <tr data-rid="{{ p.rid }}" data-label="{{ p.short }}" data-url="{{ d.base }}/{{ file }}" data-meta="{{ meta | strip }}" data-file="{{ file }}">
+          <th scope="row">{{ p.label }} <span class="badge" data-detected-badge hidden>{{ s.detected }}</span></th>
+          <td><a href="{{ d.base }}/{{ file }}">{{ p.primary.label }}</a></td>
+          <td>{% if p.secondary.file %}<a href="{{ d.base }}/{{ p.secondary.file | replace: ph_c, c.id }}">{{ p.secondary.label }}</a>{% else %}<a href="{{ p.secondary.url }}">{{ p.secondary.label }}</a>{% endif %}</td>
+        </tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+  {%- if c.id == default_ch %}</div>{% else %}</details>{% endif %}
+  {%- endfor %}
+  {%- assign rk = "win-x64-" | append: default_ch -%}
+  {%- if rel[rk].date %}<p class="small muted">Version and size as of {{ rel.generated }}; the links always fetch the current file.</p>{% endif %}
+  <div class="notice small" data-dl-unsigned hidden>{{ s.unsigned }}</div>
 </div>

@@ -1,0 +1,17 @@
+# Labels of the catalog kinds (_strategy: models.md), in display order.
+- { id: text-generation, label: Text generation }
+- { id: embeddings, label: Embeddings and reranking }
+- { id: speech-recognition, label: Speech to text }
+- { id: speech-synthesis, label: Text to speech }
+- { id: image-generation, label: Image generation }
+- { id: video-generation, label: Video generation }
+- { id: image-classification, label: Image classification }
+- { id: image-embedding, label: Image embeddings }
+- { id: object-detection, label: Object detection }
+- { id: image-segmentation, label: Segmentation (promptable) }
+- { id: image-segmentation-semantic, label: Segmentation (semantic) }
+- { id: depth-estimation, label: Depth estimation }
+- { id: ocr, label: OCR }
+- { id: image-upscaling, label: Upscaling }
+- { id: audio-codec, label: Audio codecs }
+- { id: voice-activity, label: Voice activity detection }

@@ -1,38 +1,29 @@
-# Studio download matrix. File names follow the Velopack naming of packaging/pack-studio.sh
-# (packId SharplightStudio, channel "<rid>-<stable|unstable>"). Names verified against the unstable channel on download.sharplight.dev.
+# Studio download matrix (behavior: _strategy/download-spec.md). File names follow packaging/pack-studio.sh of the engine
+# repository (packId SharplightStudio, Velopack channel "<rid>-<stable|unstable>"); checked against download.sharplight.dev.
 base: https://download.sharplight.dev/studio
 releases_url: https://github.com/infernitytech/sharplight/releases
 source_url: https://github.com/infernitytech/sharplight
-pack_id: SharplightStudio
+# Stable has no release yet: only Preview is offered. Set to true when releases.<rid>-stable.json exists.
+stable_available: false
+signed:
+  windows: false
+  macos: false
+channels:
+  - { id: stable, label: Stable, folder: stable }
+  - { id: unstable, label: Preview, folder: unstable }
 platforms:
-  - rid: win-x64
-    label: Windows (x64)
-    os: Windows
-    formats:
-      - { id: setup, label: Installer (Setup.exe), file: "{pack}-{rid}-{channel}-Setup.exe" }
-      - { id: portable, label: Portable (zip), file: "{pack}-{rid}-{channel}-Portable.zip" }
-  - rid: win-arm64
-    label: Windows (ARM64)
-    os: Windows
-    formats:
-      - { id: setup, label: Installer (Setup.exe), file: "{pack}-{rid}-{channel}-Setup.exe" }
-      - { id: portable, label: Portable (zip), file: "{pack}-{rid}-{channel}-Portable.zip" }
-  - rid: osx-arm64
-    label: macOS (Apple silicon)
-    os: macOS
-    formats:
-      - { id: setup, label: Installer (.pkg), file: "{pack}-{rid}-{channel}-Setup.pkg" }
-      - { id: portable, label: Portable (zip), file: "{pack}-{rid}-{channel}-Portable.zip" }
-  - rid: linux-x64
-    label: Linux (x64)
-    os: Linux
-    formats:
-      - { id: appimage, label: AppImage, file: "{pack}-{rid}-{channel}.AppImage" }
-  - rid: linux-arm64
-    label: Linux (ARM64)
-    os: Linux
-    formats:
-      - { id: appimage, label: AppImage, file: "{pack}-{rid}-{channel}.AppImage" }
-notes:
-  osx_intel: "Intel Macs are not supported. Studio needs an Apple silicon Mac (M1 or newer)."
-  unsigned: "Installers are not code-signed yet, so Windows SmartScreen or macOS Gatekeeper may ask for confirmation on first start."
+  - { rid: win-x64, label: Windows (x64), short: Windows,
+      primary: { label: Setup.exe, file: "SharplightStudio-win-x64-{c}-Setup.exe" },
+      secondary: { label: Portable zip, file: "SharplightStudio-win-x64-{c}-Portable.zip" } }
+  - { rid: win-arm64, label: Windows (ARM64), short: Windows (ARM64),
+      primary: { label: Setup.exe, file: "SharplightStudio-win-arm64-{c}-Setup.exe" },
+      secondary: { label: Portable zip, file: "SharplightStudio-win-arm64-{c}-Portable.zip" } }
+  - { rid: osx-arm64, label: macOS (Apple silicon), short: macOS,
+      primary: { label: .pkg installer, file: "SharplightStudio-osx-arm64-{c}-Setup.pkg" },
+      secondary: { label: Portable zip, file: "SharplightStudio-osx-arm64-{c}-Portable.zip" } }
+  - { rid: linux-x64, label: Linux (x64), short: Linux,
+      primary: { label: AppImage, file: "SharplightStudio-linux-x64-{c}.AppImage" },
+      secondary: { label: tar.gz on the GitHub release, url: "https://github.com/infernitytech/sharplight/releases" } }
+  - { rid: linux-arm64, label: Linux (ARM64), short: Linux (ARM64),
+      primary: { label: AppImage, file: "SharplightStudio-linux-arm64-{c}.AppImage" },
+      secondary: { label: tar.gz on the GitHub release, url: "https://github.com/infernitytech/sharplight/releases" } }

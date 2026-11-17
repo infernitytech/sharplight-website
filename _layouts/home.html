@@ -2,4 +2,29 @@
 layout: default
 body_class: home
 ---
-{{ content }}
+{% assign h = page.hero %}
+<section class="hero"><div class="wrap hero-grid">
+  <div>
+    <span class="badge">Open source · MIT</span>
+    <h1>{{ page.title }}</h1>
+    <p class="lead">{{ page.lead }}</p>
+    {% include download-compact.html %}
+    <p class="code-line"><a href="{{ h.secondary.url | relative_url }}"><code>{{ h.secondary.label }}</code></a></p>
+    <p class="muted small">{{ h.meta }}</p>
+  </div>
+  <div class="hero-shot">
+    <picture>
+      <source media="(prefers-color-scheme: light)" srcset="{{ '/assets/img/studio/' | append: h.image | append: '-light.png' | relative_url }}">
+      <img src="{{ '/assets/img/studio/' | append: h.image | append: '.png' | relative_url }}" alt="{{ h.image_alt }}" width="1440" height="900" fetchpriority="high">
+    </picture>
+  </div>
+</div></section>
+<section class="section"><div class="wrap">
+  <h2 class="center">Two products, one engine</h2>
+  <div class="grid">
+    {% for p in page.products %}<div class="card"><span class="muted small">{{ p.kind }}</span><h3>{{ p.name }}</h3><p>{{ p.text }}</p><p><a href="{{ p.url | relative_url }}">{{ p.link | default: "Learn more" }}</a></p></div>{% endfor %}
+  </div>
+</div></section>
+<div class="wrap page home-body">
+  <div class="prose">{{ content }}</div>
+</div>

@@ -1,0 +1,6 @@
+{%- assign dp = site.pages | where: "path", "download.md" | first -%}
+<div class="dl-box dl-compact" data-dl-compact data-default-channel="{% if site.data.downloads.stable_available %}stable{% else %}unstable{% endif %}" data-base="{{ site.data.downloads.base }}">
+  <a class="btn btn-big" data-dl-button href="{{ '/download/' | relative_url }}">{{ include.label | default: "Download Studio" }}</a>
+  <p class="muted small" data-dl-meta></p>
+  <p class="small"><a href="{{ '/download/' | relative_url }}">All systems and channels</a></p>
+</div>
