@@ -1,9 +1,9 @@
 title: Sharplight
 tagline: Run every AI model on .NET
 description: Sharplight is an open-source .NET inference engine for language, vision, speech and image models, with a desktop app (Sharplight Studio) and an enterprise server.
-# Apex domain. The Pages workflow passes the real base path (configure-pages), so the github.io URL keeps working until the custom domain is set.
-url: https://sharplight.dev
-baseurl: ""
+# Temporary project-pages URL. For go-live switch to: url: https://sharplight.dev, baseurl: "" (see README).
+url: https://infernitytech.github.io
+baseurl: /sharplight-website
 lang: en
 github_repo: https://github.com/infernitytech/sharplight
 contact_email: contact@infernity.at

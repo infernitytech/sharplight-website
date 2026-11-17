@@ -209,3 +209,20 @@ details.more{margin-top:12px}details.more summary{cursor:pointer;font-weight:600
 .meta-line{color:var(--text2)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 .btn:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Enterprise page */
+.ent-hero{padding:104px 0 72px}
+.ent-hero h1{font-size:clamp(2.4rem,5vw,3.8rem);max-width:22ch}
+.ent-hero .lead{font-size:1.35rem;max-width:40rem}
+.ent-body{padding-top:32px}
+.feature-row{display:grid;gap:20px;grid-template-columns:repeat(3,minmax(0,1fr));margin:8px 0 48px}
+.feature .ico{display:inline-flex;width:44px;height:44px;border-radius:10px;align-items:center;justify-content:center;background:color-mix(in srgb,var(--accent) 16%,var(--surface));color:var(--accent-text)}
+.feature .ico svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.feature h3{margin:14px 0 8px}
+.feature ul{padding-left:1.1rem;margin:0}
+.feature li{margin-bottom:10px}
+.cta-after{margin:40px 0 12px}
+.it-team{margin-top:72px;padding-top:24px;border-top:1px solid var(--border);color:var(--text2);font-size:.95rem}
+.it-team h3{font-size:1.05rem;color:var(--muted);margin-top:0}
+@media(max-width:900px){.feature-row{grid-template-columns:1fr}.ent-hero{padding:64px 0 40px}}
+.feature>p:first-child{margin:0}
