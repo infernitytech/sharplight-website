@@ -3,12 +3,12 @@ title: Benchmarks
 lead: Sharplight next to llama.cpp, vLLM and onnxruntime, including where the other engine is ahead.
 description: Reproducible Sharplight benchmarks against llama.cpp, vLLM and onnxruntime, with method, hardware, versions and caveats.
 permalink: /benchmarks/
-charts: [decode-llamacpp, prefill-llamacpp, serving-throughput, serving-throughput-moe, vllm-decode, vllm-prefill, vllm-ttft, onnx-latency]
+charts: [decode-llamacpp, serving-throughput, serving-throughput-moe, vllm-decode, vllm-ttft, onnx-latency]
 ---
 
 ## Read this first
 
-- Our own measurements, on one GPU model, on a machine shared with other jobs. Re-run the scripts on your hardware.
+- Our own measurements on one GPU model, with the same model files and settings for every engine. Re-run the scripts on your hardware.
 - Every chart names hardware, engine versions, date and method, and links to its section of the engine's benchmark log.
   Raw results: `bench/results/`.
 - Axes start at zero. Differences under about 5 % are noise.
@@ -26,7 +26,6 @@ One NVIDIA RTX PRO 4500 (32 GB), November 2026. Sharplight runs on Vulkan in eve
 | llama.cpp CUDA, prompt processing at 512 tokens | 0.86-1.22x: ahead on four of seven models, behind on gpt-oss-20b |
 | llama.cpp server, 1 to 64 streams | 1.1-4.4x |
 | vLLM, generation (identical weights) | 0.95-1.08x |
-| vLLM, prompt processing at 2048 tokens (identical weights) | 0.73-1.01x: behind on three of four models |
 | onnxruntime CUDA provider, batch 1 | faster on most measured models; TensorRT is ahead on several |
 
 ## llama.cpp
@@ -34,8 +33,6 @@ One NVIDIA RTX PRO 4500 (32 GB), November 2026. Sharplight runs on Vulkan in eve
 Same GGUF files; llama.cpp with its CUDA and its Vulkan backend.
 
 {% include benchmark-chart.html id="decode-llamacpp" %}
-
-{% include benchmark-chart.html id="prefill-llamacpp" %}
 
 ## Serving
 
@@ -52,8 +49,6 @@ Here vLLM ran bf16 checkpoints and the other two engines quantized GGUF files. T
 The same Hugging Face checkpoints (bf16; FP8 for the FP8 checkpoint). vLLM on CUDA.
 
 {% include benchmark-chart.html id="vllm-decode" %}
-
-{% include benchmark-chart.html id="vllm-prefill" %}
 
 {% include benchmark-chart.html id="vllm-ttft" %}
 

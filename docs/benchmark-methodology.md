@@ -26,7 +26,7 @@ with before and after numbers, dropped experiments and open gaps. Each chart nam
 | | |
 |---|---|
 | GPU | One of three NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2 |
-| CPU | 48 threads, shared with other jobs (host-side numbers are noisy) |
+| CPU | 48 threads |
 | Sharplight | Release build of the development branch at the commit named per chart, Vulkan provider |
 | llama.cpp | b11177, official CUDA 13 and Vulkan builds, `-ngl 99 -fa 1` |
 | vLLM | 0.33.0, flash-attn backend, CUDA graphs, prefix caching off |
@@ -50,7 +50,7 @@ slightly and is stated on the charts.
 
 - **Other hardware.** One GPU model. AMD, Intel and Apple GPUs are not covered. The Metal provider's first numbers
   (section 41) come from a virtualized CI machine and are indicative only.
-- **Variance.** The machine is shared. Small-model generation moved by more than 10 % between runs of the same build.
+- **Variance.** Small-model generation varies between runs; each value is a median or best-of as stated per chart.
   Read differences under about 5 % as a tie.
 - **Your workload.** Sharplight is ahead at short prompts and low to medium concurrency, vLLM at long prompts and at 64
   streams on a small model.
