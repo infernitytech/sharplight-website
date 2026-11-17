@@ -1,0 +1,26 @@
+---
+layout: default
+---
+<div class="wrap doc-grid">
+  <aside class="doc-side" aria-label="Documentation">
+    <form class="doc-search" role="search" onsubmit="return false">
+      <label class="sr" for="doc-q">Search the docs</label>
+      <input id="doc-q" type="search" placeholder="Search docs" autocomplete="off" data-search>
+      <ul class="search-results" data-search-results hidden></ul>
+    </form>
+    <nav>
+      {% for sec in site.data.docs_nav %}
+      <div class="side-sec"><h2>{{ sec.title }}</h2><ul>
+        {% for i in sec.items %}<li><a href="{{ i.url | relative_url }}"{% if page.url == i.url %} aria-current="page"{% endif %}>{{ i.title }}</a></li>{% endfor %}
+      </ul></div>
+      {% endfor %}
+    </nav>
+  </aside>
+  <article class="doc-main prose">
+    <h1>{{ page.title }}</h1>
+    {% if page.lead %}<p class="lead">{{ page.lead }}</p>{% endif %}
+    {{ content }}
+  </article>
+  <aside class="doc-toc" aria-label="On this page"><div data-toc></div></aside>
+</div>
+<script id="sl-search-url" type="text/plain">{{ '/search.json' | relative_url }}</script>

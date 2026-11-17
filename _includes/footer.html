@@ -1,0 +1,14 @@
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-cols">
+      <div><strong>Sharplight</strong><p class="muted">Open-source .NET inference engine.<br>Studio · Server · Core</p></div>
+      <div><strong>Product</strong><a href="{{ '/studio/' | relative_url }}">Studio</a><a href="{{ '/server/' | relative_url }}">Server</a><a href="{{ '/download/' | relative_url }}">Download</a></div>
+      <div><strong>Learn</strong><a href="{{ '/docs/' | relative_url }}">Docs</a><a href="{{ '/models/' | relative_url }}">Models</a><a href="{{ '/benchmarks/' | relative_url }}">Benchmarks</a></div>
+      <div><strong>Project</strong><a href="{{ site.github_repo }}">GitHub</a><a href="{{ '/open-source/' | relative_url }}">Open source</a><a href="mailto:{{ site.contact_email }}">Contact</a></div>
+    </div>
+    <p class="legal"><span>© {{ 'now' | date: '%Y' }} Infernity Technologies GmbH</span> · <a href="{{ '/imprint/' | relative_url }}">Imprint</a> · <a href="{{ '/privacy/' | relative_url }}">Privacy</a></p>
+  </div>
+</footer>
+<script id="sl-downloads" type="application/json">{{ site.data.downloads | jsonify }}</script>
+<script src="{{ '/assets/js/site.js' | relative_url }}" defer></script>
+{% if page.scripts %}{% for s in page.scripts %}<script src="{{ '/assets/js/' | append: s | relative_url }}" defer></script>{% endfor %}{% endif %}

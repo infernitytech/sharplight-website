@@ -1,0 +1,12 @@
+<header class="site-header">
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="wrap bar">
+    <a class="brand" href="{{ '/' | relative_url }}"><img src="{{ '/assets/img/icon.png' | relative_url }}" alt="" width="28" height="28"><span>Sharplight</span></a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Menu"><span></span></button>
+    <nav id="nav" class="nav" aria-label="Main">
+      {% for n in site.data.nav %}<a href="{{ n.url | relative_url }}"{% if page.url == n.url or page.url contains n.url and n.url != '/' %} aria-current="page"{% endif %}>{{ n.title }}</a>{% endfor %}
+      <a class="btn btn-small" href="{{ '/download/' | relative_url }}">Download</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle light and dark theme" title="Toggle theme"><span aria-hidden="true">◐</span></button>
+    </nav>
+  </div>
+</header>

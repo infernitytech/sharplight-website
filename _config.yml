@@ -1,0 +1,22 @@
+title: Sharplight
+tagline: Run every AI model on .NET
+description: Sharplight is an open-source .NET inference engine for language, vision, speech and image models, with a desktop app (Sharplight Studio) and an enterprise server.
+url: https://infernitytech.github.io
+baseurl: /sharplight-website
+lang: en
+github_repo: https://github.com/infernitytech/sharplight
+contact_email: contact@infernity.at
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  auto_ids: true
+defaults:
+  - scope: { path: "" }
+    values: { layout: page }
+  - scope: { path: "docs" }
+    values: { layout: doc }
+exclude: [Gemfile, Gemfile.lock, README.md, scripts, vendor, _strategy]

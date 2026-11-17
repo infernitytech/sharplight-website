@@ -1,0 +1,29 @@
+# Schema (the strategist/benchmark owner fills this file):
+# - id: unique slug
+#   title: chart title
+#   unit: "tokens/s"
+#   higher_is_better: true
+#   description: one sentence
+#   hardware: "..."
+#   versions: "Sharplight 0.1.x, llama.cpp bNNNN"
+#   methodology: "..."
+#   caveats: ["...", "..."]
+#   groups:                       # one bar cluster per group (model, scenario)
+#     - label: "Qwen3 0.6B Q8_0"
+#       results:
+#         - { engine: Sharplight, value: 100 }
+#         - { engine: llama.cpp, value: 90 }
+- id: placeholder
+  title: Placeholder chart (not real data)
+  unit: tokens/s
+  higher_is_better: true
+  description: Layout demonstration only. Real measurements replace this entry.
+  hardware: n/a
+  versions: n/a
+  methodology: Placeholder values to exercise the chart layout.
+  caveats: ["Not measured data."]
+  groups:
+    - label: Model A
+      results: [{ engine: Sharplight, value: 100 }, { engine: Reference, value: 90 }]
+    - label: Model B
+      results: [{ engine: Sharplight, value: 60 }, { engine: Reference, value: 70 }]

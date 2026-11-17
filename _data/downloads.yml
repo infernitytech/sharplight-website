@@ -1,0 +1,38 @@
+# Studio download matrix. File names follow the Velopack naming of packaging/pack-studio.sh
+# (packId SharplightStudio, channel "<rid>-<stable|unstable>"). Names verified against the unstable channel on download.sharplight.dev.
+base: https://download.sharplight.dev/studio
+releases_url: https://github.com/infernitytech/sharplight/releases
+source_url: https://github.com/infernitytech/sharplight
+pack_id: SharplightStudio
+platforms:
+  - rid: win-x64
+    label: Windows (x64)
+    os: Windows
+    formats:
+      - { id: setup, label: Installer (Setup.exe), file: "{pack}-{rid}-{channel}-Setup.exe" }
+      - { id: portable, label: Portable (zip), file: "{pack}-{rid}-{channel}-Portable.zip" }
+  - rid: win-arm64
+    label: Windows (ARM64)
+    os: Windows
+    formats:
+      - { id: setup, label: Installer (Setup.exe), file: "{pack}-{rid}-{channel}-Setup.exe" }
+      - { id: portable, label: Portable (zip), file: "{pack}-{rid}-{channel}-Portable.zip" }
+  - rid: osx-arm64
+    label: macOS (Apple silicon)
+    os: macOS
+    formats:
+      - { id: setup, label: Installer (.pkg), file: "{pack}-{rid}-{channel}-Setup.pkg" }
+      - { id: portable, label: Portable (zip), file: "{pack}-{rid}-{channel}-Portable.zip" }
+  - rid: linux-x64
+    label: Linux (x64)
+    os: Linux
+    formats:
+      - { id: appimage, label: AppImage, file: "{pack}-{rid}-{channel}.AppImage" }
+  - rid: linux-arm64
+    label: Linux (ARM64)
+    os: Linux
+    formats:
+      - { id: appimage, label: AppImage, file: "{pack}-{rid}-{channel}.AppImage" }
+notes:
+  osx_intel: "Intel Macs are not supported. Studio needs an Apple silicon Mac (M1 or newer)."
+  unsigned: "Installers are not code-signed yet, so Windows SmartScreen or macOS Gatekeeper may ask for confirmation on first start."

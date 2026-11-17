@@ -1,0 +1,6 @@
+# Sidebar of the docs section. `url` is the page URL below /docs/ (without baseurl).
+- title: Getting started
+  items:
+    - { title: Overview, url: /docs/ }
+    - { title: Install Studio, url: /docs/install/ }
+    - { title: First steps, url: /docs/first-steps/ }

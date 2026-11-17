@@ -1,0 +1,7 @@
+- { title: Studio, url: /studio/ }
+- { title: Developers, url: /developers/ }
+- { title: Server, url: /server/ }
+- { title: Models, url: /models/ }
+- { title: Benchmarks, url: /benchmarks/ }
+- { title: Docs, url: /docs/ }
+- { title: Open source, url: /open-source/ }
