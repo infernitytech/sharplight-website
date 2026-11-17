@@ -1,34 +1,27 @@
 ---
 title: Install the packages
-lead: Add Sharplight to a .NET project and check that it finds your hardware.
+lead: Add Sharplight to a project and list the devices it finds.
 description: Install the Sharplight NuGet packages and discover the available devices.
 permalink: /docs/getting-started/
 ---
 
 ## Requirements
 
-- .NET 11 SDK.
-- Windows (x64, ARM64), Linux (x64, ARM64) or macOS on Apple silicon.
-- For GPU use: a Vulkan driver from your GPU vendor. Without one, Sharplight runs on the CPU provider.
-- A model file. Any of these work: a GGUF file, a Hugging Face checkpoint folder (safetensors), an ONNX model, or a
-  Sharplight `.slm` package. The [model list]({{ '/models/' | relative_url }}) shows what has been verified.
+- .NET 11 SDK
+- Windows or Linux (x64, ARM64), or macOS on Apple silicon
+- For GPU use: your GPU vendor's Vulkan driver. Without one, models run on the CPU.
+- A model: a GGUF file, a Hugging Face checkpoint folder, an ONNX model or a `.slm` package
+  ([verified models]({{ '/models/' | relative_url }}))
 
-## Add the package
+## Install
 
 ```sh
-dotnet new console -n HelloSharplight
-cd HelloSharplight
 dotnet add package Sharplight --prerelease
 ```
 
-`Sharplight` is the entry package. It references the engine, the importers for the supported formats and the CPU and
-Vulkan providers, and gives you one registration call: `services.AddSharplight()`.
-
-The packages are alpha prereleases, so `--prerelease` is required and the API can change between versions.
+The packages are alpha prereleases; the API changes between versions.
 
 ## Register and discover devices
-
-Sharplight is composed through `Microsoft.Extensions.DependencyInjection`. There is no static setup.
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
@@ -44,19 +37,18 @@ foreach (var discovered in catalog.Discover())
 }
 ```
 
-`Discover()` lists the execution providers in order of preference, GPUs first. To open a device for loading models:
+`Discover()` lists providers in order of preference, GPUs first. Open a device to load models on:
 
 ```csharp
 var gpu = catalog.Discover().First(d => d.Availability.IsAvailable).Provider;
 var slot = new DeviceSlot { Device = gpu.OpenDevice(gpu.GetDevices()[0]) };
 ```
 
-The guides that follow use `slot` for "the device to load the model on".
+The other guides use `slot` for this device.
 
-## Choosing parts yourself
+## Individual registrations
 
-`AddSharplight()` is a shortcut for the individual registrations. An application that wants only GGUF models on the CPU
-can register just those:
+`AddSharplight()` calls all of the registrations below. To take only some, for example GGUF models on the CPU:
 
 ```csharp
 var services = new ServiceCollection()
@@ -74,17 +66,17 @@ var services = new ServiceCollection()
 | `Sharplight.AspNetCore` | `AddSharplightServer(...)` | HTTP endpoints |
 | `Sharplight.Extensions.AI` | `AddSharplightChatClient(...)` and others | `Microsoft.Extensions.AI` adapters |
 
-All registrations are idempotent, and options are `Microsoft.Extensions.Options` classes, so they also bind from configuration.
+Registrations are idempotent. Options are `Microsoft.Extensions.Options` classes and bind from configuration.
 
-## Scripts and tests
+## Without a host
 
-Code without a host of its own can use a ready-made container:
+For scripts and tests:
 
 ```csharp
 using var services = SharplightDefaults.CreateServiceProvider();
 ```
 
-## Building from source
+## Build from source
 
 ```sh
 git clone https://github.com/infernitytech/sharplight
@@ -92,6 +84,4 @@ cd sharplight
 dotnet build Sharplight.slnx -c Release
 ```
 
-## Next
-
-[First text generation]({{ '/docs/text-generation/' | relative_url }})
+Next: [First text generation]({{ '/docs/text-generation/' | relative_url }})

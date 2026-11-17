@@ -1,17 +1,14 @@
 ---
 title: Chat, tools and structured output
-lead: Turn a language model into a chat service with templates, reasoning, tool calls and constrained output.
+lead: Chat templates, reasoning, tool calls and constrained output.
 description: Chat with local models in Sharplight using ModelService or IChatClient, with structured output and tool calls.
 permalink: /docs/chat/
 ---
 
-There are two ways to chat with a model. `Microsoft.Extensions.AI` is the shortest; the engine and `ModelService` give
-you the serving stack that the HTTP endpoints use.
-
 ## With Microsoft.Extensions.AI
 
-`SharplightChatClient` implements `IChatClient`. Messages and tools are rendered with the model's own chat template,
-reasoning becomes `TextReasoningContent`, tool calls become `FunctionCallContent`, and images are `DataContent`.
+`SharplightChatClient` implements `IChatClient`. Messages and tools are rendered with the model's chat template;
+reasoning becomes `TextReasoningContent`, tool calls `FunctionCallContent`, images `DataContent`.
 
 ```csharp
 var services = new ServiceCollection().AddSharplight();
@@ -24,14 +21,14 @@ var answer = await chat.GetResponseAsync("Why is the sky blue?");
 Console.WriteLine(answer.Text);
 ```
 
-`UseFunctionInvocation()` runs the tools the model calls. The default backend runs one generation at a time; to let many
-callers share a model, back the client with an `InferenceEngine` (implement `ITextGenerationBackend`).
+The default backend runs one generation at a time. For many callers on one model, back the client with an
+`InferenceEngine` (implement `ITextGenerationBackend`).
 
 ## With the engine and ModelService
 
-`InferenceEngine` is a continuous-batching scheduler: it advances several sequences in one forward pass, admits requests
-from any thread and shares cached prompt prefixes between them. `ModelService` is the chat layer on top: it renders
-messages and tools through the chat template and parses reasoning blocks and tool calls out of the output.
+`InferenceEngine` is the continuous-batching scheduler the HTTP endpoints use: several sequences per forward pass,
+requests from any thread, shared prompt-prefix cache. `ModelService` adds the chat template and parses reasoning and
+tool calls.
 
 ```csharp
 var loader = provider.GetRequiredService<ModelLoader>();
@@ -47,12 +44,11 @@ var result = await service.StartChat(new ChatRequest
 Console.WriteLine(result.Choices[0].Content);          // also .Reasoning, .ToolCalls, .Usage
 ```
 
-`StartChat` builds and tokenizes the prompt synchronously; call it from a worker thread, not a UI thread.
+`StartChat` builds and tokenizes the prompt synchronously; call it from a worker thread.
 
 ## Structured output
 
-A chat request can constrain the answer. The engine masks the tokens that would break the format before every sample, so
-the output always parses.
+The engine masks tokens that would break the format before every sample, so the output always parses.
 
 ```csharp
 var schema = """{"type":"object","properties":{"city":{"type":"string"}},"required":["city"]}""";
@@ -64,12 +60,17 @@ var request = new ChatRequest
 };
 ```
 
-`OutputFormat` also offers `JsonObject`, `Regex`, `Gbnf` (the llama.cpp grammar format) and `Choice`. A reasoning block
-before the answer stays unconstrained. The supported JSON-schema subset covers types, properties and required fields,
-enums and constants, `anyOf` / `oneOf` / `allOf`, local `$ref` including recursion, array bounds, string lengths,
-patterns and common formats.
+| `OutputFormat` | Constrains to |
+|---|---|
+| `JsonSchema` | a JSON schema: types, properties, required fields, enums, constants, `anyOf` / `oneOf` / `allOf`, local `$ref` including recursion, array bounds, string lengths, patterns, common formats |
+| `JsonObject` | any JSON object |
+| `Regex` | a regular expression |
+| `Gbnf` | a grammar in the llama.cpp format |
+| `Choice` | one of a set of choices |
 
-Below the chat layer, the same mechanism is a `GrammarConstraint` on a `GenerationRequest`:
+A reasoning block before the answer stays unconstrained.
+
+Below the chat layer, use a `GrammarConstraint` on a `GenerationRequest`:
 
 ```csharp
 var constraint = new GrammarConstraint(Grammar.FromJsonSchema(schema), model.Tokenizer);   // reuse across requests
@@ -78,26 +79,29 @@ var request = new GenerationRequest { PromptTokens = prompt, MaxTokens = 200, Co
 
 ## Tool calls
 
-Tools passed in a chat request are rendered into the prompt in the model's own tool syntax, and the model's calls come
-back as typed tool calls. When a call is forced (`ToolChoiceMode.Required` or a named function) or a tool is marked
-strict, the call is constrained to the model's tool-call syntax and the tool's parameter schema.
+Tools in a chat request are rendered in the model's own tool syntax, and calls come back typed. A forced call
+(`ToolChoiceMode.Required` or a named function) or a strict tool is constrained to the tool-call syntax and the tool's
+parameter schema.
 
 ## Scheduling
 
-When several requests share an engine:
-
-- Running sequences get their step first; new prompts fill the rest of each step's token budget, so a long prompt does
-  not stall running streams.
-- Queued requests are admitted by `Priority`, then by fair share between tenants (`Tenant`), favoring whoever used least recently.
+- Running sequences step first; new prompts fill the rest of each step's token budget, so a long prompt does not stall
+  running streams.
+- Queued requests are admitted by `Priority`, then by fair share between tenants (`Tenant`), favoring whoever used
+  least recently.
 - A cancelled request frees its slot at the next step.
-- A full queue raises `QueueFullException`; over HTTP that is status 429 with `Retry-After`.
-
-`engine.GetMetrics()` returns queue depth, slot use, time-to-first-token and inter-token histograms and prefix-cache hits.
+- A full queue raises `QueueFullException`; over HTTP, status 429 with `Retry-After`.
+- `engine.GetMetrics()` returns queue depth, slot use, time-to-first-token and inter-token histograms and prefix-cache
+  hits.
 
 ## Speculative decoding
 
-The engine can draft several tokens and verify them in one pass. Greedy output stays token-identical, and sampled output
-keeps the same distribution. Two drafters exist: prompt lookup (`NgramSpeculator`), which pays off for edits, code and
-quoting, and the model's own multi-token-prediction head where the checkpoint has one (`MtpSpeculator`).
+The engine can draft several tokens and verify them in one pass. Greedy output stays token-identical; sampled output
+keeps the same distribution.
+
+| Drafter | Source of drafts |
+|---|---|
+| `NgramSpeculator` | prompt lookup; pays off for edits, code and quoting |
+| `MtpSpeculator` | the model's multi-token-prediction head, where the checkpoint has one |
 
 Source: [api-overview.md, sections 3 and 6](https://github.com/infernitytech/sharplight/blob/main/docs/api-overview.md).

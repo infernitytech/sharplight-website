@@ -1,78 +1,53 @@
 ---
 title: Open source
-lead: Sharplight and Sharplight Studio are MIT licensed and developed in the open. This page says what that covers, and what it does not.
+lead: Sharplight and Sharplight Studio are MIT licensed and developed in the open.
 description: License, contributing and governance of Sharplight, and how the open-source products relate to the commercial Sharplight Server.
 permalink: /open-source/
 ---
 
-## The license
-
-The engine (every `Sharplight.*` NuGet package), the command-line tools and Sharplight Studio are released under the
-[MIT license](https://github.com/infernitytech/sharplight/blob/main/LICENSE). You can use them in commercial and
-closed-source products, modify them and redistribute them. The source is on
-[GitHub](https://github.com/infernitytech/sharplight).
-
-Models are not part of Sharplight and have their own licenses. The [model list]({{ '/models/' | relative_url }}) shows
-the license stated on each model's page; check it before you use a model commercially.
-
-## What is open and what is commercial
+## License
 
 | | License | Source |
 |---|---|---|
-| Sharplight (engine, NuGet packages, command-line tools) | MIT | public |
-| Sharplight Studio (desktop app) | MIT | public |
-| Verified-model catalog | MIT, in the same repository | public |
-| Sharplight Server (cluster and multi-tenant platform, in development) | commercial | closed |
+| Sharplight (engine, NuGet packages, command-line tools) | [MIT](https://github.com/infernitytech/sharplight/blob/main/LICENSE) | [public](https://github.com/infernitytech/sharplight) |
+| Sharplight Studio | MIT | public |
+| Verified-model catalog | MIT | public |
+| Sharplight Server (in development) | commercial | closed |
 
-Sharplight Server is built on the open-source engine through its public NuGet packages. Work on the engine that the server
-needs, and that is useful to anyone else, goes into the open-source repository.
+Models have their own licenses; the [model list]({{ '/models/' | relative_url }}) shows each one.
 
-**License.** Sharplight and Sharplight Studio are MIT licensed. You can use them in commercial and closed-source products, modify them and redistribute them. To contribute, see the section below.
+## The commercial product
 
-## Why there is a commercial product
+Sharplight is developed by Infernity Technologies GmbH. Sharplight Server, hardware and consulting pay for that work.
+The server is built on the engine's public NuGet packages; engine work it needs that is useful to others goes into the
+open-source repository. [Enterprise]({{ '/enterprise/' | relative_url }})
 
-Sharplight is developed by Infernity Technologies GmbH. Building an inference engine and keeping it current with new
-models is ongoing work, and the server product, together with hardware and consulting for organizations, is how that work
-is meant to be paid for. [About Sharplight Server]({{ '/server/' | relative_url }})
+## Credits
 
-## Built with the help of other projects
-
-Sharplight is its own implementation in C#, and it stands on work done by others:
-
-- It reads the model formats defined by **llama.cpp / ggml** (GGUF), **Hugging Face** (safetensors, transformers and
-  diffusers layouts), **ONNX**, **whisper.cpp** and **stable-diffusion.cpp**.
-- Its results are verified against those projects' implementations and against **onnxruntime**, and its benchmarks
-  compare with **llama.cpp**, **vLLM** and **onnxruntime**. They are the references that make our claims checkable.
-- It ships a small number of third-party native libraries: FFmpeg (an LGPL-only build) for video, miniaudio, Opus, Ogg
-  and Vorbis for audio, and MoltenVK on macOS. Their licenses are included in the packages as third-party notices.
-- Studio is built with Avalonia and packaged with Velopack.
+- **Formats**: llama.cpp / ggml (GGUF), Hugging Face (safetensors, transformers and diffusers layouts), ONNX,
+  whisper.cpp, stable-diffusion.cpp.
+- **References** for verification and benchmarks: those projects, onnxruntime and vLLM.
+- **Bundled native libraries**: FFmpeg (LGPL-only build), miniaudio, Opus, Ogg, Vorbis, MoltenVK on macOS. Their
+  licenses ship as third-party notices.
+- **Studio**: Avalonia, Velopack.
 
 ## Contributing
 
-- **Report a problem or request a model.** Open an [issue](https://github.com/infernitytech/sharplight/issues). For a
-  model, include the Hugging Face repository id and the file or quantization.
-- **Reproduce a benchmark.** The scripts and raw results are in the repository. If your numbers differ, or you think a
-  comparison is unfair to another engine, an issue is welcome.
-- **Send a change.** Fork, branch from `develop`, and open a pull request against `develop`. The code style is described
-  in `docs/code-style.md`. Tests are xunit v3 executables:
+- **Issues and model requests**: [GitHub issues](https://github.com/infernitytech/sharplight/issues). For a model,
+  include the Hugging Face repository id and the file or quantization.
+- **Benchmarks**: if your numbers differ or a comparison is unfair to another engine, open an issue.
+- **Changes**: branch from `develop`, pull request against `develop`. Style: `docs/code-style.md`.
+- **Catalog entries**: need the pinned revision and how the model was verified. See `docs/verified-catalog.md`.
 
 ```sh
 dotnet build Sharplight.slnx -c Release
 dotnet run --project tests/<Project> -c Release --no-build
 ```
 
-- **Add a model to the catalog.** The catalog is a JSON file with a schema and a validator; an entry needs the pinned
-  revision and how the model was verified. See `docs/verified-catalog.md`.
+## Project
 
-## How the project is run
-
-- **Maintainers.** The project is maintained by Infernity Technologies GmbH. Decisions are made in the open, in issues and
-  pull requests.
-- **Branches.** `develop` is where work is integrated; `main` is the stable line; releases are cut from `release/*`
-  branches. Every push is built and tested by CI.
-- **Releases.** NuGet packages are published from release branches. Studio builds are published for every change on
-  `develop` (preview channel) and for releases (stable channel).
-- **Roadmap.** What is in progress and what is still open is kept in
-  [docs/roadmap.md](https://github.com/infernitytech/sharplight/blob/main/docs/roadmap.md).
-- **Security.** Please report security problems privately to [contact@infernity.at](mailto:contact@infernity.at) rather
-  than in a public issue.
+- **Maintainer**: Infernity Technologies GmbH. Decisions are made in issues and pull requests.
+- **Branches**: `develop` for integration, `main` stable, releases from `release/*`. CI builds and tests every push.
+- **Releases**: NuGet packages from release branches; Studio preview builds from `develop`, stable builds from releases.
+- **Roadmap**: [docs/roadmap.md](https://github.com/infernitytech/sharplight/blob/main/docs/roadmap.md).
+- **Security**: report privately to [contact@infernity.at](mailto:contact@infernity.at).

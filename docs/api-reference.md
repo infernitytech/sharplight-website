@@ -5,20 +5,14 @@ description: Pointers to the Sharplight API reference, the XML documentation, th
 permalink: /docs/api-reference/
 ---
 
-A browsable, generated API reference is not published yet. Until it is, the reference is in three places.
+A generated API reference is not published yet. Until then:
 
-## XML documentation
+- **XML documentation** on every public type and member, shipped with the packages.
+- **[api-overview.md](https://github.com/infernitytech/sharplight/blob/main/docs/api-overview.md)**: the long-form tour of the public API.
 
-Every public type and member carries XML documentation. It ships as `*.xml` files next to the assemblies in the NuGet
-packages, so your editor shows it in completion and hover.
+Types and members can still be renamed or moved between versions; the README's Packages section records package renames.
 
-## The API overview
-
-[docs/api-overview.md](https://github.com/infernitytech/sharplight/blob/main/docs/api-overview.md) in the repository is
-the long-form tour of the public API, kept current with the code: assemblies, registration, every task client with its
-options, the serving stack, precompilation and conventions.
-
-## Namespaces and entry points
+## Entry points
 
 | Area | Package | Main types |
 |---|---|---|
@@ -36,31 +30,13 @@ options, the serving stack, precompilation and conventions.
 | HTTP | `Sharplight.AspNetCore` | `AddSharplightServer`, `UseSharplightServer`, `MapSharplightServer`, `SharplightServerOptions` |
 | Microsoft.Extensions.AI | `Sharplight.Extensions.AI` | `SharplightChatClient`, `SharplightEmbeddingGenerator`, `SharplightSpeechToTextClient`, `SharplightTextToSpeechClient`, `SharplightImageGenerator` |
 
-## Further reference documents
+## Reference documents
 
-In the repository's [docs folder](https://github.com/infernitytech/sharplight/tree/main/docs):
-
-| Document | Covers |
-|---|---|
-| `api-overview.md` | The public API |
-| `extensions-ai.md` | The `Microsoft.Extensions.AI` adapters |
-| `model-format.md` | The `.slm` container, artifact tiers, precompilation |
-| `model-hub.md` | Pulling models, the local store, the command-line commands |
-| `model-support.md` | Architectures, quantization formats, sweeps |
-| `onnx-support.md` | ONNX operator coverage |
-| `compatible-models.md`, `verified-catalog.md` | Verified models and the catalog format |
-| `kv-cache.md` | The paged and quantized KV cache |
-| `storage.md` | Storage locations and modes |
-| `studio.md` | Sharplight Studio in detail |
-| `benchmarks.md`, `roadmap.md` | The performance log and what is open |
+The repository's [docs folder](https://github.com/infernitytech/sharplight/tree/main/docs) has one document per area:
+`extensions-ai.md`, `model-format.md`, `model-hub.md`, `model-support.md`, `onnx-support.md`, `compatible-models.md`,
+`verified-catalog.md`, `kv-cache.md`, `storage.md`, `studio.md`, `benchmarks.md`, `roadmap.md`.
 
 ## Samples
 
-The `samples/` directory has small, complete programs: `Sharplight.Cli` (chat and benchmark), `Sharplight.Server`
-(serving and the hub commands), `Sharplight.Convert`, `Sharplight.OnnxRun`, `Sharplight.Transcribe`, `Sharplight.Vision`,
-`Sharplight.GenerateImage` and `Sharplight.GenerateVideo`.
-
-## Stability
-
-The packages are alpha prereleases. Types and members can be renamed or moved between versions; the README's Packages
-section records package renames.
+`samples/`: `Sharplight.Cli` (chat and benchmark), `Sharplight.Convert`, `Sharplight.OnnxRun`, `Sharplight.Transcribe`,
+`Sharplight.Vision`, `Sharplight.GenerateImage`, `Sharplight.GenerateVideo`.
