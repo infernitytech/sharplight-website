@@ -1,6 +1,6 @@
 ---
 title: Image generation
-lead: Generate and edit images with Stable Diffusion, FLUX and related models.
+lead: Text to image, image to image, inpainting and LoRA with Stable Diffusion, FLUX and related models.
 description: Text to image, image to image, inpainting and LoRA with local diffusion models in Sharplight.
 permalink: /docs/image-generation/
 ---
@@ -26,21 +26,35 @@ await foreach (var update in generator.GenerateStreamingAsync(request, options))
 }
 ```
 
-`GenerateAsync(request)` returns the finished result without the progress updates.
+`GenerateAsync(request)` returns only the finished result.
 
 ## Supported inputs
 
 | Family | Files |
 |---|---|
-| Stable Diffusion 1.x, 2.x, XL | diffusers folders, single-file `.safetensors` or `.ckpt` checkpoints, stable-diffusion.cpp GGUF files |
-| FLUX.1 (schnell, dev and fine-tunes) | diffusers folders, original single files, transformer-only GGUF files with companion files |
+| Stable Diffusion 1.x, 2.x, XL | diffusers folders, single-file `.safetensors` or `.ckpt`, stable-diffusion.cpp GGUF |
+| FLUX.1 (schnell, dev, fine-tunes) | diffusers folders, original single files, transformer-only GGUF with companion files |
 
-Further families (including Qwen-Image and FLUX.1 Kontext for editing) are in the
-[model list]({{ '/models/?kind=image-generation' | relative_url }}), each with its measured difference from the diffusers reference.
+More families (Qwen-Image, FLUX.1 Kontext for editing) are in the
+[model list]({{ '/models/?kind=image-generation' | relative_url }}), each with its measured difference from diffusers.
 
-## Models that come in several files
+## Options
 
-Transformer-only checkpoints need their text encoders and VAE. Give them as auxiliary sources by role:
+| Option | Notes |
+|---|---|
+| `Scheduler` (`Samplers`) | `euler`, `euler-karras`, `euler-ancestral`, `ddim`, `pndm`, `dpm++2m`, `dpm++2m-karras`; flow models use `euler`. Default: the sampler the model was published with. Each matches the diffusers scheduler step by step. |
+| `GuidanceScale` | Classifier-free guidance, with an optional negative prompt. Guidance-distilled models take the scale as an input; FLUX.1-schnell ignores it. |
+| `Seed` | Image *i* of a request uses `Seed + i`. The noise is identical on every machine and provider. |
+| `Width`, `Height` | Native size is 512×512 (SD 1.x) or 1024×1024 (SDXL, FLUX). Other sizes (multiples of 64; FLUX: 16) rebuild the model once per size. |
+| `PreviewInterval` | A low-resolution preview every *n* steps. |
+
+## Image to image and inpainting
+
+Set `ImageGenerationRequest.Image` and `Strength`. Add `Mask` for inpainting: white areas are regenerated.
+
+## Models in several files
+
+Transformer-only checkpoints take their text encoders and VAE as auxiliary sources by role:
 
 ```csharp
 using var model = TaskModel.Load(loader, new TaskLoadOptions
@@ -58,30 +72,11 @@ using var generator = clients.Create<IImageGenerator>(model);   // clients: the 
 var result = await generator.GenerateAsync(new ImageGenerationRequest { Prompt = "a lighthouse at dusk" });   // 4 steps, 1024 × 1024
 ```
 
-Roles you leave out are filled with files found beside the transformer. Saved as a `.slm` package, the model becomes one
-file. Studio's verified catalog installs the companions for you.
-
-## Options
-
-- **Samplers** (`Samplers`): `euler`, `euler-karras`, `euler-ancestral`, `ddim`, `pndm`, `dpm++2m`, `dpm++2m-karras`; flow
-  models use `euler`. Each follows the corresponding diffusers scheduler step by step. The default is the sampler the
-  model was published with.
-- **Guidance**: classifier-free guidance with `GuidanceScale` and an optional negative prompt. Guidance-distilled models
-  take the scale as an input; FLUX.1-schnell ignores it.
-- **Seeds**: image *i* of a request uses `Seed + i`. The noise is identical on every machine and provider, so a seed
-  reproduces across hardware.
-- **Sizes**: models are built for their native size (512×512 for SD 1.x, 1024×1024 for SDXL and FLUX). Another `Width` /
-  `Height` (multiples of 64; FLUX: of 16) rebuilds the model once per size.
-- **Previews**: `PreviewInterval` delivers a low-resolution preview every few steps.
-
-## Image to image and inpainting
-
-Set `ImageGenerationRequest.Image` and `Strength` for image to image. Add `Mask` for inpainting: white areas are
-regenerated, and the input is kept everywhere else.
+Omitted roles are filled from files beside the transformer. A `.slm` package holds all of them in one file.
 
 ## LoRA
 
-LoRA files are auxiliary sources whose role starts with `lora`; a `@scale` suffix sets the strength.
+A LoRA is an auxiliary source whose role starts with `lora`; `@scale` sets the strength.
 
 ```csharp
 using var model = TaskModel.Load(loader, new TaskLoadOptions
@@ -92,20 +87,19 @@ using var model = TaskModel.Load(loader, new TaskLoadOptions
 });
 ```
 
-kohya-ss, diffusers / PEFT and ComfyUI LoRA files are read for SD 1.x / 2.x / XL, FLUX, Chroma and Qwen-Image. LyCORIS and
-DoRA variants are rejected.
+Reads kohya-ss, diffusers / PEFT and ComfyUI files for SD 1.x / 2.x / XL, FLUX, Chroma and Qwen-Image. LyCORIS and DoRA
+are rejected.
 
 ## Memory
 
-When a model's weights take most of the device memory (FLUX's bf16 files on a 32 GB GPU), the generator holds either the
-text encoders or the denoiser and VAE at a time and swaps between them. The conditioning of the previous request is reused
-when the prompts are the same, so new seeds, sizes or step counts do not encode again.
+When the weights take most of the device memory, the generator swaps between the text encoders and the denoiser with
+VAE. Conditioning is reused while the prompt stays the same.
 
-## Over HTTP and from the command line
+## HTTP and command line
 
-- `services.AddSharplightImageGenerator(name: "sd15")` serves the generator on the OpenAI-compatible
-  `POST /v1/images/generations` (`prompt`, `n`, `size`, `response_format: "b64_json"`, plus the extensions
-  `negative_prompt`, `steps`, `guidance_scale`, `seed` and `sampler`). Requests to one generator run one at a time.
-- `sharplight-generate-image` (samples/Sharplight.GenerateImage) is a command-line front end.
+- `services.AddSharplightImageGenerator(name: "sd15")` serves `POST /v1/images/generations` (`prompt`, `n`, `size`,
+  `response_format: "b64_json"`; extensions `negative_prompt`, `steps`, `guidance_scale`, `seed`, `sampler`). One
+  request per generator at a time.
+- `sharplight-generate-image` (samples/Sharplight.GenerateImage).
 
 Source: [api-overview.md, Image generation](https://github.com/infernitytech/sharplight/blob/main/docs/api-overview.md).

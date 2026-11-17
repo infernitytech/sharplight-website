@@ -1,14 +1,11 @@
 ---
 title: Speech
-lead: Transcribe recordings with speech-to-text models and speak text with text-to-speech models, including cloned voices.
+lead: Speech to text and text to speech, including cloned voices.
 description: Speech to text and text to speech with local models in Sharplight.
 permalink: /docs/speech/
 ---
 
 ## Speech to text
-
-Register a recognizer and call `TranscribeAsync`. The model can be a Hugging Face checkpoint folder, a whisper.cpp `.bin`
-file or a `.slm` package.
 
 ```csharp
 var services = new ServiceCollection().AddSharplight()
@@ -24,35 +21,34 @@ foreach (var segment in result.Segments)
 
 `TranscribeStreamingAsync` yields segments as they are decoded.
 
-### Model families
-
-One interface covers two kinds of recognizer; which one a model gets follows from the model itself.
-
 | Family | Examples | Notes |
 |---|---|---|
-| Encoder-decoder with a prompted decoder | Whisper and derivatives, Moonshine, Canary | Language detection when `Language` is null; Whisper's timestamp rules; Canary translates to English with `Translate` |
+| Encoder-decoder | Whisper and derivatives, Moonshine, Canary | Detects the language when `Language` is null; Canary translates to English with `Translate` |
 | Frame-aligned (CTC, transducer) | Parakeet | Word timestamps with `TimestampGranularity.Word` |
 
 ### Options
 
-`SpeechRecognitionOptions` includes:
+`SpeechRecognitionOptions`:
 
-- `Language` (null detects it), `Translate` (to English).
-- `Timestamps`: segment (default), word where the model supports it, or none.
-- `BeamSize` for beam search; `Sampling` for sampling instead of greedy decoding.
-- `Prompt` to condition the first window; `ConditionOnPreviousText` to prompt each window with the text so far.
-- `UseVoiceActivityDetection` with a voice-activity model.
+| Option | Meaning |
+|---|---|
+| `Language` | null detects it |
+| `Translate` | translate to English |
+| `Timestamps` | segment (default), word where the model supports it, or none |
+| `BeamSize`, `Sampling` | beam search, or sampling instead of greedy decoding |
+| `Prompt` | conditions the first window |
+| `ConditionOnPreviousText` | prompts each window with the text so far |
+| `UseVoiceActivityDetection` | needs a voice-activity model |
 
-Long recordings are processed in windows of up to 30 seconds. Each segment carries its token ids, mean log probability and
+Recordings are processed in windows of up to 30 seconds. Each segment carries its token ids, mean log probability and
 no-speech probability.
 
 Not yet: temperature fallback, and word timestamps for the Whisper family.
 
 ### Audio input
 
-`WavFile.Read` reads PCM and float WAV files. `AudioBuffer` converts to mono and resamples. With `AddSharplight()`, the
-native audio library also decodes FLAC, MP3, Ogg Vorbis and Ogg Opus through `IAudioDecoder`, and gives access to
-microphones and playback devices.
+`WavFile.Read` reads PCM and float WAV. `AudioBuffer` converts to mono and resamples. `IAudioDecoder` decodes FLAC, MP3,
+Ogg Vorbis and Ogg Opus; the same native library opens microphones and playback devices.
 
 ## Text to speech
 
@@ -66,16 +62,19 @@ SpeechSynthesisResult speech = await synthesizer.SynthesizeAsync("Hello from a l
 WavFile.Write("hello.wav", speech.Audio);
 ```
 
-`SynthesizeStreamingAsync` yields audio chunks while the model is still generating, so playback can start early.
+`SynthesizeStreamingAsync` yields audio chunks during generation.
 
 ### Voices
 
-`SpeechSynthesisOptions` carries the voice:
+`SpeechSynthesisOptions`:
 
-- `Voice`: a built-in voice of the model.
-- `ReferenceAudio`: a recording to clone, with its words in `ReferenceText` for models that align them (F5-TTS, CosyVoice 3).
-- `Instructions`: a natural-language instruction on how to speak, for models that take one (CosyVoice 3).
-- `Language`, `Speed`.
+| Option | Meaning |
+|---|---|
+| `Voice` | a built-in voice of the model |
+| `ReferenceAudio`, `ReferenceText` | a recording to clone; its words for models that align them (F5-TTS, CosyVoice 3) |
+| `Instructions` | how to speak, in natural language (CosyVoice 3) |
+| `Language`, `Speed` | |
+| `NormalizeText` | `false` passes the text as written |
 
 ```csharp
 var options = new SpeechSynthesisOptions
@@ -86,29 +85,23 @@ var options = new SpeechSynthesisOptions
 var speech = await synthesizer.SynthesizeAsync("This is said in the cloned voice.", options);
 ```
 
-Models that clone voices (Chatterbox, XTTS v2, CosyVoice 3, F5-TTS) can turn a recording into a saved `VoiceProfile` once
-and reuse it, without running the encoders again.
+Cloning models (Chatterbox, XTTS v2, CosyVoice 3, F5-TTS) can save a recording as a `VoiceProfile` and reuse it without
+running the encoders again. Clone only voices you have the right to use.
 
-Numbers, dates, times, currency amounts and common abbreviations are spelled out before synthesis for English, German,
-French, Spanish, Italian, Portuguese, Chinese and Japanese. `NormalizeText = false` passes the text as written.
+Numbers, dates, times, currency amounts and common abbreviations are spelled out for English, German, French, Spanish,
+Italian, Portuguese, Chinese and Japanese.
 
-Please clone only voices you have the right to use.
+Verified models: [model list]({{ '/models/?kind=speech-synthesis' | relative_url }}).
 
-### Verified text-to-speech models
+## HTTP and Microsoft.Extensions.AI
 
-Kokoro, Orpheus, OuteTTS, Chatterbox, F5-TTS, XTTS v2 and CosyVoice 3 are in the
-[model list]({{ '/models/?kind=speech-synthesis' | relative_url }}), each with the reference it was compared against.
-
-## Over HTTP and Microsoft.Extensions.AI
-
-- `services.AddSharplightSpeechRecognizer("whisper-1")` serves the recognizer on the OpenAI-compatible
-  `/v1/audio/transcriptions` and `/v1/audio/translations` (WAV upload; `json`, `text`, `srt`, `vtt` and `verbose_json` responses).
-- `SharplightSpeechToTextClient` and `SharplightTextToSpeechClient` adapt the clients to `ISpeechToTextClient` and
-  `ITextToSpeechClient`.
+- `services.AddSharplightSpeechRecognizer("whisper-1")` serves `/v1/audio/transcriptions` and `/v1/audio/translations`
+  (WAV upload; `json`, `text`, `srt`, `vtt`, `verbose_json`).
+- `SharplightSpeechToTextClient` and `SharplightTextToSpeechClient` implement `ISpeechToTextClient` and `ITextToSpeechClient`.
 
 ## Command line
 
-`samples/Sharplight.Transcribe` is the recognizer as a tool:
-`sharplight-transcribe model audio.wav [--language en] [--translate] [--beam-size 5] [--format srt]`.
+`samples/Sharplight.Transcribe`:
+`sharplight-transcribe model audio.wav [--language en] [--translate] [--beam-size 5] [--format srt]`
 
 Source: [api-overview.md, Tasks and Speech recognition](https://github.com/infernitytech/sharplight/blob/main/docs/api-overview.md).

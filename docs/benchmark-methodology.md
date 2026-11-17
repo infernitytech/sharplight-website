@@ -1,26 +1,25 @@
 ---
 title: Benchmark methodology
-lead: How the numbers on the benchmarks page are measured, what they do and do not show, and how to run them yourself.
+lead: How the numbers on the benchmarks page are measured, what they do not show, and how to re-run them.
 description: Method, hardware, versions and limits of the Sharplight benchmarks against llama.cpp, vLLM and onnxruntime.
 permalink: /docs/benchmark-methodology/
 ---
 
-The [benchmarks page]({{ '/benchmarks/' | relative_url }}) shows a selection. The complete record is
-[docs/benchmarks.md](https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md) in the repository: a log
-written round by round as the engine was optimized, with before and after numbers, experiments that were dropped and
-open gaps. The charts on this site copy numbers from that log and name the section.
+The [benchmarks page]({{ '/benchmarks/' | relative_url }}) shows a selection from
+[docs/benchmarks.md](https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md), the round-by-round log
+with before and after numbers, dropped experiments and open gaps. Each chart names its section of the log.
 
 ## Principles
 
-1. **Same input.** Engines run the same model files wherever they can read them. Where they cannot (vLLM does not read
+1. **Same input.** Engines run the same model files where they can read them. Where they cannot (vLLM does not read
    GGUF), the chart says so, and a separate comparison uses identical Hugging Face checkpoints.
-2. **Official builds, fast settings.** llama.cpp's official CUDA and Vulkan builds with all layers on the GPU and flash
-   attention; vLLM with its flash-attention backend and CUDA graphs; onnxruntime's CUDA provider with its default TF32,
-   and TensorRT with engine build time excluded.
-3. **Same GPU, one engine at a time.** Each engine runs alone on the benchmark GPU.
-4. **Report the unfavorable rows.** Tables include every model measured, and each round ends with a list of gaps.
-5. **Check that the output is the same.** Speed changes are accepted only when greedy output stays identical to the
-   previous build, or when a difference is explained and recorded.
+2. **Official builds, fast settings.** llama.cpp: official CUDA and Vulkan builds, all layers on the GPU, flash
+   attention. vLLM: flash-attention backend, CUDA graphs. onnxruntime: CUDA provider with its default TF32; TensorRT
+   with engine build time excluded.
+3. **Same GPU, one engine at a time.**
+4. **Unfavorable rows are reported.** Tables include every model measured; each round ends with a list of gaps.
+5. **Output is checked.** A speed change is accepted only when greedy output stays identical to the previous build, or
+   the difference is explained and recorded.
 
 ## Hardware and versions
 
@@ -33,39 +32,28 @@ open gaps. The charts on this site copy numbers from that log and name the secti
 | vLLM | 0.33.0, flash-attn backend, CUDA graphs, prefix caching off |
 | onnxruntime | onnxruntime-gpu 1.32, CUDA and TensorRT execution providers |
 
-Numbers measured before 2026-11-15 in the log are from a different GPU (RTX PRO 6000 Blackwell Max-Q) and are not
-comparable with these.
+Log entries before 2026-11-15 are from a different GPU (RTX PRO 6000 Blackwell Max-Q) and are not comparable.
 
-## The measurements
+## Measurements
 
-**Single stream** (sections 34, 36, 39).
+| Test | Log sections | Method |
+|---|---|---|
+| Single stream | 34, 36, 39 | Prompt processing ("pp512", "pp2048"): prompt tokens per second at that prompt length. Generation ("tg"): output tokens per second at a stated context depth. Sharplight: `--bench N`, several process runs, best prefill of 4 per run, median decode step. llama.cpp: `llama-bench -r 5`. vLLM: `bench/vllm_single.py`, median of 5. |
+| Serving throughput | 34.3 | One server per engine, 64 slots, 512-token contexts. Prompts of about 250 random-word tokens, 128 output tokens at temperature 0, at 1, 4, 16 and 64 simultaneous requests. 2 rounds each, median, with time to first token and inter-token latency. |
+| Long-prompt serving | 38.4, 39.3 | 16 slots, 4096-token context, 2000-token prompts, 16 output tokens. Measures time to first token and prompt-processing throughput under load. |
+| ONNX latency | 37 | `bench/onnx/parity_bench.py`: every measurement in its own process, engines of one model back to back, rounds interleaved, minimum latency reported. Accuracy is checked against a reference in the same run. |
 
-- *Prompt processing* ("pp512", "pp2048"): prompt tokens per second for a prompt of that length.
-- *Generation* ("tg"): output tokens per second, at a stated context depth.
-- Sharplight: `--bench N`, several process runs; best prefill of 4 per run, median decode step.
-- llama.cpp: `llama-bench -r 5`. vLLM: `bench/vllm_single.py`, median of 5.
-- Sharplight's prefill value is a best-of while the others are medians or means. This favors Sharplight slightly and is
-  stated on the charts.
-
-**Serving throughput** (section 34.3). One server per engine with 64 slots and 512-token contexts. A load generator sends
-prompts of about 250 random-word tokens and reads 128 output tokens at temperature 0, at 1, 4, 16 and 64 simultaneous
-requests; 2 rounds each, median reported, with time to first token and inter-token latency.
-
-**Long-prompt serving** (sections 38.4, 39.3). 16 slots, 4096-token context, 2000-token prompts, 16 output tokens. This
-measures time to first token and prompt-processing throughput under load.
-
-**ONNX latency** (section 37). `bench/onnx/parity_bench.py`: every measurement in its own process, engines of one model
-back to back, rounds interleaved; the minimum latency is reported. Accuracy is checked against a reference in the same run.
+Sharplight's single-stream prefill value is a best-of while the others are medians or means. This favors Sharplight
+slightly and is stated on the charts.
 
 ## What the numbers do not show
 
-- **Other hardware.** One GPU model. AMD, Intel and Apple GPUs are not covered.
-- **Variance.** The machine is shared. Small-model generation in particular moved by more than 10 % between runs of the
-  same build. Differences under about 5 % should be read as a tie.
-- **Your workload.** Prompt lengths, output lengths and concurrency change which engine is ahead: Sharplight is ahead at
-  short prompts and low to medium concurrency, vLLM at long prompts and at 64 streams on a small model.
-- **Quality.** Quantized and full-precision weights differ in output quality; the serving chart that mixes them says so.
-- **Apple silicon.** The Metal provider's first numbers (section 41) come from a virtualized CI machine and are indicative only.
+- **Other hardware.** One GPU model. AMD, Intel and Apple GPUs are not covered. The Metal provider's first numbers
+  (section 41) come from a virtualized CI machine and are indicative only.
+- **Variance.** The machine is shared. Small-model generation moved by more than 10 % between runs of the same build.
+  Read differences under about 5 % as a tie.
+- **Your workload.** Sharplight is ahead at short prompts and low to medium concurrency, vLLM at long prompts and at 64
+  streams on a small model.
 - **Independence.** These are the vendor's own measurements.
 
 ## Reproduce
@@ -84,4 +72,4 @@ python3 bench/s38_summarize.py bench/results/mine after
 ```
 
 If your results differ, or a setting is unfair to another engine, please
-[open an issue](https://github.com/infernitytech/sharplight/issues). Corrections are welcome and will be reflected on the site.
+[open an issue](https://github.com/infernitytech/sharplight/issues); the site will be corrected.

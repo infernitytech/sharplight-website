@@ -1,8 +1,6 @@
 ---
 title: Models
-lead: >-
-  The models that have been tried with Sharplight and work, with how each one was checked. A model that is not listed has
-  not been tried yet.
+lead: Models checked with Sharplight, and how. Not listed means not tried yet.
 description: Browse the models verified with Sharplight, by task, format and provider, with how each was checked.
 permalink: /models/
 catalog_url: https://download.sharplight.dev/catalog/verified-models.json
@@ -26,45 +24,41 @@ Filter labels for the kinds:
 Empty state: "No verified model matches these filters. That does not mean a model will not work: it has not been tried yet."
 {% endcomment %}
 
-The list is generated from Sharplight's verified-model catalog, the same file Sharplight Studio uses on its Discover
-page. Every entry is pinned to the exact Hugging Face revision and files that were checked, so what you install is what
-was tested. The catalog currently holds {{ cat_total }} models across {{ cat_kinds }} kinds of task (last updated {{ cat_updated }}).
+{{ cat_total }} models across {{ cat_kinds }} kinds of task, each pinned to the Hugging Face revision and files that were
+checked (updated {{ cat_updated }}). Studio's Discover page uses the same catalog.
 
 {% include models-browser.html %}
 
-## What the levels mean
+## Levels
 
 | Level | Meaning |
 |---|---|
-| **Verified** | The output was compared with a reference implementation on the real weights: generated tokens identical to transformers or llama.cpp, text identical to whisper.cpp, images or audio within a stated error of diffusers, stable-diffusion.cpp, the model's own package or onnxruntime. |
-| **Verified (tiny)** | The architecture is verified against its reference on a small random checkpoint of the same structure. No real checkpoint was compared. |
-| **Loads** | The real checkpoint imports: weights mapped, tokenizer built. Its output was not compared with a reference. |
+| **Verified** | Output compared with a reference implementation on the real weights: tokens identical to transformers or llama.cpp, text identical to whisper.cpp, images or audio within a stated error of diffusers, stable-diffusion.cpp, the model's own package or onnxruntime. |
+| **Verified (tiny)** | Architecture verified on a small random checkpoint of the same structure; no real checkpoint compared. |
+| **Loads** | The real checkpoint imports; output not compared. |
 | **Partial** | Works with a stated limitation. |
 
-The **Providers** shown for a model say where it was tested: the CPU provider, the Vulkan GPU provider, or both.
+**Providers** says where a model was tested: CPU, Vulkan GPU, or both.
+
+Greedy text from 2- or 3-bit quantized files can diverge from llama.cpp after some tokens even when the scores agree;
+affected entries say so.
 
 ## Formats
 
-Sharplight reads safetensors and GGUF (every ggml quantization type), Hugging Face quantized checkpoints (FP8, NVFP4,
-MXFP4, GPTQ, AWQ and others), whisper.cpp files, diffusers folders, single-file checkpoints, stable-diffusion.cpp GGUF
-files and ONNX. Any of them can be converted to Sharplight's own `.slm` package.
+safetensors, GGUF (every ggml quantization type), Hugging Face quantized checkpoints (FP8, NVFP4, MXFP4, GPTQ, AWQ and
+others), whisper.cpp files, diffusers folders, single-file checkpoints, stable-diffusion.cpp GGUF files and ONNX. All
+convert to `.slm`.
 
 ## Beyond the list
 
-- **Language model architectures.** Of the 172 architectures llama.cpp knows, 168 run end to end. In a sweep of 1138
-  released GGUF files, 1080 import. The full matrix is in
-  [model-support.md](https://github.com/infernitytech/sharplight/blob/main/docs/model-support.md).
-- **ONNX.** Operator coverage and tested model groups are in
-  [onnx-support.md](https://github.com/infernitytech/sharplight/blob/main/docs/onnx-support.md).
-- **Known not to work.** The models and formats that fail, with reasons, are listed at the end of
+- **Language models**: 168 of llama.cpp's 172 architectures run end to end; 1080 of 1138 released GGUF files in a sweep
+  import. [model-support.md](https://github.com/infernitytech/sharplight/blob/main/docs/model-support.md)
+- **ONNX**: operator coverage and tested model groups.
+  [onnx-support.md](https://github.com/infernitytech/sharplight/blob/main/docs/onnx-support.md)
+- **Known not to work**: listed with reasons at the end of
   [compatible-models.md](https://github.com/infernitytech/sharplight/blob/main/docs/compatible-models.md).
-
-## A note on small differences
-
-Quantized files round differently between runtimes. Text generated greedily from a 2- or 3-bit file can diverge from
-llama.cpp after some tokens even when the underlying scores agree. Where that was seen, the entry says so.
 
 ## Request a model
 
-Open an issue on [GitHub](https://github.com/infernitytech/sharplight/issues) with the Hugging Face repository id and the
-file or quantization you use. Models that fail to import are reported with a reason.
+Open an [issue](https://github.com/infernitytech/sharplight/issues) with the Hugging Face repository id and the file or
+quantization.

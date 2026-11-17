@@ -1,16 +1,14 @@
 ---
 title: First text generation
-lead: Load a language model and generate text, first with the task client, then with streaming.
+lead: Load a language model and generate text, whole or streamed.
 description: Generate text with a local language model from C# using Sharplight's ITextGenerator.
 permalink: /docs/text-generation/
 ---
 
-You need the package from [Install the packages]({{ '/docs/getting-started/' | relative_url }}) and a model file, for
-example a small GGUF such as Qwen3 0.6B Q8_0 from the [model list]({{ '/models/' | relative_url }}).
+Needs the [package]({{ '/docs/getting-started/' | relative_url }}) and a model file, for example Qwen3 0.6B Q8_0 from
+the [model list]({{ '/models/' | relative_url }}).
 
 ## Generate
-
-Register a text generator for a model and resolve `ITextGenerator`. The model is loaded once, on first use.
 
 ```csharp
 using Microsoft.Extensions.DependencyInjection;
@@ -32,12 +30,10 @@ TextGenerationResult completion = await generator.GenerateAsync(
 Console.WriteLine(completion.Text);
 ```
 
-`ModelPath` can point at a GGUF file, a Hugging Face checkpoint folder or a `.slm` package. Only `Devices` is required
-besides the path.
+`ModelPath` is a GGUF file, a Hugging Face checkpoint folder or a `.slm` package. `ModelPath` and `Devices` are
+required. The model loads once, on first use.
 
 ## Stream tokens
-
-`GenerateStreamingAsync` yields `GeneratedToken` items while the model is generating:
 
 ```csharp
 var options = new GenerationOptions
@@ -52,13 +48,12 @@ await foreach (var token in generator.GenerateStreamingAsync("Once upon a time",
 }
 ```
 
-The call returns to you before any compute starts, and tokens are produced on a background thread, so this is safe to
-call from a UI thread. Cancellation is observed between tokens.
+The call returns before any compute starts and tokens are produced on a background thread, so it is safe on a UI
+thread. Cancellation is observed between tokens.
 
-## The lower-level objects
+## Lower level: model, session, generator
 
-The task client sits on top of `LlmModel`, sessions and a generator, which you can use directly when you need control
-over the context:
+For direct control over the context:
 
 ```csharp
 var loader = provider.GetRequiredService<ModelLoader>();
@@ -74,10 +69,10 @@ foreach (var token in generator.Generate("The capital of France is", options))
 Console.WriteLine($"{generator.LastStats!.DecodeTokensPerSecond:F1} tok/s");
 ```
 
-Successive `Generate` calls continue the same context. `LlmModel.Load` reads the file and builds the compute graphs;
-nothing is compiled or uploaded to a device until you create a session. `LlmLoadOptions` also controls how a model is
-split over several devices and whether a CPU fallback takes what does not fit. Sessions and generators are for one thread
-at a time.
+- Successive `Generate` calls continue the same context.
+- `LlmModel.Load` reads the file and builds the graphs. Nothing is compiled or uploaded until a session is created.
+- `LlmLoadOptions` also controls splitting a model over several devices and the CPU fallback for what does not fit.
+- Sessions and generators are for one thread at a time.
 
 ## Images in the prompt
 
@@ -91,8 +86,7 @@ var image = new ImageInput(width, height, rgbBytes);
 foreach (var token in generator.Generate(promptWithImagePlaceholder, [image], options)) { /* ... */ }
 ```
 
-A GGUF vision model takes its projector file as an auxiliary source: `Auxiliary = { [AuxiliaryRoles.Mmproj] = path }` in
-the load options.
+A GGUF vision model takes its projector file in the load options: `Auxiliary = { [AuxiliaryRoles.Mmproj] = path }`.
 
 ## Next
 

@@ -1,8 +1,8 @@
 ---
 title: Sharplight Studio
 lead: >-
-  A desktop app for running AI models on your own computer: chat, images, video, speech and vision, with a model list that
-  only offers what has been checked. Free and open source.
+  A desktop app for local AI models: chat, images, video, speech and vision, with a catalog of models that were checked.
+  Free and open source.
 description: Sharplight Studio is a free, open-source desktop app for local AI models on Windows, Linux and macOS.
 permalink: /studio/
 cta:
@@ -14,81 +14,64 @@ cta:
 
 ![Sharplight Studio's chat page with a conversation streaming from a local model]({{ '/assets/img/studio/studio-chat.png' | relative_url }})
 
-Studio is published for Windows (x64 and ARM64), Linux (x64 and ARM64) and macOS on Apple silicon. It is self-contained:
-there is nothing else to install.
+Windows and Linux (x64, ARM64), macOS on Apple silicon. Self-contained.
 
-## Find models that work
+## Verified models
 
-Searching a model hub turns up many files that do not run: unsupported architectures, broken conversions, missing
-tokenizers. Studio's Discover page opens on the verified catalog instead. Every entry was downloaded, run and compared
-with a reference implementation, and is pinned to the exact revision that was checked.
+Discover opens on the verified catalog: every entry was run and compared with a reference implementation.
 
-- Browse by task: text, speech, images, video, vision, audio.
-- Pick a variant by size and quantization; Studio shows whether it fits your device before you download.
-- One click installs the model together with the companion files it needs (text encoders, VAEs, vocoders, vision projectors).
-- You can still search all of Hugging Face. Results carry a compatibility verdict, and gated repositories say what to do.
+- Browse by task; pick a size and quantization; see whether it fits your device before downloading.
+- One click installs the model with its companion files (text encoders, VAEs, vocoders, vision projectors).
+- Search all of Hugging Face, with a compatibility estimate per result.
 
 ![Discover page listing verified models with sizes, licenses and how each was verified]({{ '/assets/img/studio/studio-discover-verified.png' | relative_url }})
 
 ## Chat
 
-- Answers stream as Markdown, with collapsible reasoning for models that think before they answer.
-- Regenerate an answer or edit a question; both keep the earlier versions.
-- Attach images (for models with vision) and documents: PDF, DOCX, HTML, text and code.
-- Each conversation keeps its own model, system prompt and sampling settings, and conversations keep generating in the
-  background, so two chats on different models can run at once.
+- Streaming Markdown, collapsible reasoning.
+- Regenerate or edit; earlier versions are kept.
+- Attach images and documents (PDF, DOCX, HTML, text, code).
+- Model, system prompt and sampling per conversation; chats keep generating in the background.
 
 ## Images and video
 
-Generate images with Stable Diffusion, FLUX and Qwen-Image models: text to image, image to image, inpainting, LoRA files,
-live previews while the image forms. Generate video with Wan and LTX-Video models on the Video page.
+Stable Diffusion, FLUX and Qwen-Image: text to image, image to image, inpainting, LoRA, live previews. Video with Wan and
+LTX-Video.
 
 ![Image page with a prompt, generation settings and a gallery of results]({{ '/assets/img/studio/studio-image.png' | relative_url }})
 
 ## Speech
 
-**Transcribe** recordings or the microphone with Whisper, Moonshine, Canary and Parakeet models, with timestamps and
-subtitle export. **Speak** text with Kokoro, Chatterbox, XTTS, CosyVoice and F5-TTS models. Models that clone voices can
-save a voice from a short recording and reuse it.
+Transcribe files or the microphone (Whisper, Moonshine, Canary, Parakeet) with timestamps and subtitle export. Speak
+text (Kokoro, Chatterbox, XTTS, CosyVoice, F5-TTS), including cloned voices from a short recording.
 
 ![Transcribe page showing a recording and its timestamped transcript]({{ '/assets/img/studio/studio-transcribe.png' | relative_url }})
 
 ## Vision
 
-Classify images, detect objects, segment by clicking, estimate depth, read text and upscale, each on its own page with the
-result drawn over the image.
+Classification, object detection, click-to-segment, depth, OCR and upscaling, with results drawn over the image.
 
 ![Vision page with detected objects outlined on a photo]({{ '/assets/img/studio/studio-vision-detection.png' | relative_url }})
 
-## A local API server
+## Local API server
 
-Switch on the built-in server and the chat models you have loaded answer on OpenAI- and Anthropic-compatible endpoints.
-Existing clients only change their base URL. Models can load on demand and unload when idle, and the page shows a
-ready-to-paste `curl` request and a request log.
+Loaded chat models answer on OpenAI- and Anthropic-compatible endpoints, with load on demand, unload when idle and a
+request log. Speech models are not served yet.
 
 ![Server page with host, port, API key settings and a request log]({{ '/assets/img/studio/studio-server.png' | relative_url }})
 
-## See what is going on
+## Also
 
-- **Statistics**: tokens, prompt and generation speed, and time to first token per model, kept in a local database.
-- **Package inspector**: open any `.slm` model package and see its components, tokenizer, graphs and weights.
-- **Fit estimates**: before loading, Studio shows how a model will be placed on your GPU and what would spill to the CPU.
+- **Statistics**: tokens, speed and time to first token per model.
+- **Package inspector**: components, tokenizer, graphs and weights of any `.slm` file.
+- **Fit estimates**: GPU placement and CPU spill before loading.
+- **Storage**: portable, system folders or a folder you pick; switching moves the files.
 
-## Your files, where you want them
+## Status
 
-Studio keeps everything it writes (settings, conversations, models, caches) in one place that you choose: next to the app
-(portable), in the system's standard folders, or in a folder you pick. Switching moves the files along.
+- Preview builds until the first stable release.
+- Installers are not code-signed yet; see the [download page]({{ '/download/' | relative_url }}) for the first-start steps.
+- Update check at startup and every six hours; asks before installing; can be turned off.
 
-## Good to know
-
-- **Preview builds.** Studio is in an early version. Until the first stable release, downloads come from the preview
-  channel, which updates often.
-- **Installers are not code-signed yet.** Windows SmartScreen and macOS Gatekeeper ask for confirmation on first start.
-  The [download page]({{ '/download/' | relative_url }}) explains the steps.
-- **Updates.** Studio checks for a new version at startup and every six hours and asks before installing. You can turn the
-  check off in Settings.
-- **The built-in API server serves chat models.** Speech models are not served by it yet.
-- **Compatibility verdicts for models outside the catalog are estimates**, not guarantees.
-
-[Download Studio]({{ '/download/' | relative_url }}) · [Studio guide]({{ '/docs/studio/' | relative_url }}) ·
-[Source on GitHub](https://github.com/infernitytech/sharplight/tree/main/apps/Sharplight.Studio)
+[Studio guide]({{ '/docs/studio/' | relative_url }}) ·
+[Source](https://github.com/infernitytech/sharplight/tree/main/apps/Sharplight.Studio)
