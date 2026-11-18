@@ -14,6 +14,7 @@ strings:
   channel_preview: Preview
   channel_preview_note: Built from every change on the development branch. Updates often and may have rough edges.
   no_stable: There is no stable release yet. The preview build is the current version of Studio.
+---
 
 {% comment %} The download widget (button, channel switch, matrix) is placed here by the layout or include. {% endcomment %}
 {% include download-widget.html %}

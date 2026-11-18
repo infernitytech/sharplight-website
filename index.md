@@ -3,7 +3,8 @@ layout: home
 title: Local AI inference for .NET
 lead: >-
   An open-source engine that runs language, speech, vision, image and video models on your own GPU or CPU, from C#.
-  NVIDIA, AMD and Intel GPUs through Vulkan, Apple silicon through Metal. No Python, no CUDA.
+  NVIDIA, AMD and Intel GPUs through Vulkan, Apple silicon through Metal. Written from scratch in C# with its own
+  GPU shaders: not a wrapper, no code or runtime from other engines. No Python, no CUDA.
 description: >-
   Sharplight is an open-source .NET inference engine for language, speech, vision, image and video models, with a free
   desktop app, Sharplight Studio.
@@ -60,9 +61,6 @@ var completion = await generator.GenerateAsync("The capital of France is", new G
 | Vision | Classification, detection, segmentation, depth, OCR, upscaling | {{ n_vision }} |
 | Audio | Codecs, voice activity detection | {{ n_audio }} |
 
-Reads GGUF, safetensors, ONNX, diffusers and whisper.cpp files. {{ cat_verified }} of {{ cat_total }} catalog models are
-verified against a reference implementation; 168 of llama.cpp's 172 architectures run end to end.
-[Browse models]({{ '/models/' | relative_url }})
 
 ## Performance
 
@@ -82,9 +80,8 @@ One NVIDIA RTX PRO 4500, November 2026, our own measurements:
 |---|---|---|---|
 | GPU | NVIDIA, AMD, Intel via Vulkan (x64, ARM64) | NVIDIA, AMD, Intel via Vulkan (x64, ARM64) | Metal (new), or Vulkan via MoltenVK |
 | CPU | yes | yes | yes |
-| Studio | Setup.exe, portable zip | AppImage | .pkg, zip |
 
-Version 0.2; the API may still change before 1.0. [Hardware and providers]({{ '/docs/hardware/' | relative_url }})
+[Hardware and providers]({{ '/docs/hardware/' | relative_url }})
 
 ## For organizations
 

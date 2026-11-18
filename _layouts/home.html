@@ -20,7 +20,7 @@ body_class: home
   </div>
 </div></section>
 <section class="section"><div class="wrap">
-  <h2 class="center">Two products, one engine</h2>
+  <h2 class="center">Two products, one engine, free and open source</h2>
   <div class="grid">
     {% for p in page.products %}<div class="card"><span class="muted small">{{ p.kind }}</span><h3>{{ p.name }}</h3><p>{{ p.text }}</p><p><a href="{{ p.url | relative_url }}">{{ p.link | default: "Learn more" }}</a></p></div>{% endfor %}
   </div>
