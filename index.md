@@ -4,7 +4,7 @@ title: Local AI inference for .NET
 lead: >-
   An open-source engine that runs language, speech, vision, image and video models on your own GPU or CPU, from C#.
   NVIDIA, AMD and Intel GPUs through Vulkan, Apple silicon through Metal. Written from scratch in C# with its own
-  GPU shaders: not a wrapper, no code or runtime from other engines. No Python, no CUDA.
+  optimized hardware backend code: not a wrapper, no code or runtime from other engines. No Python, no CUDA.
 description: >-
   Sharplight is an open-source .NET inference engine for language, speech, vision, image and video models, with a free
   desktop app, Sharplight Studio.
