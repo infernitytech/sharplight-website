@@ -67,7 +67,8 @@ var completion = await generator.GenerateAsync("The capital of France is", new G
 One NVIDIA RTX PRO 4500, November 2026, our own measurements on the same weights for every engine:
 
 - vLLM: serving throughput at parity (0.99-1.03x), first token in about half the time at 16 streams.
-- MoE models larger than memory: DeepSeek-V3.1 (405 GB) read from disk at 1.6x of llama.cpp on one 32 GB GPU.
+- llama.cpp, same GGUF files and the same statistic: batched generation 1.6-3.2x on Vulkan and 1.1-2.0x on CUDA at 16-64 sequences.
+- MoE models larger than the GPU: generation at 1.4x of llama.cpp on Vulkan with experts in system memory (level on CUDA); DeepSeek-V3.1 (405 GB) read from disk at 1.6x of llama.cpp on one 32 GB GPU.
 - ONNX on CUDA: faster than onnxruntime's CUDA provider on every measured model at the same precision setting.
 
 {% include benchmark-chart.html id="ttft-vllm" %}

@@ -32,7 +32,7 @@ with before and after numbers, dropped experiments and open gaps. Each chart nam
 | | |
 |---|---|
 | GPU | NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), CUDA 13.2 |
-| CPU and memory | AMD EPYC 7443, 10 threads, 62 GB (the tests with experts on disk) |
+| CPU and memory | AMD EPYC 7443, 10 threads, 62 GB (the tests with experts in system memory or on disk) |
 | Disk | NVMe SSD reading 7.4 GB/s (the tests with experts on disk) |
 | Sharplight | Release build of the development branch at the commit or date named per chart; CUDA or Vulkan provider as named |
 | llama.cpp | b11177, official CUDA 13 and Vulkan builds, `-ngl 99 -fa 1` |
@@ -46,6 +46,8 @@ Log entries before 2026-11-15 are from a different GPU (RTX PRO 6000 Blackwell M
 | Test | Log sections | Method |
 |---|---|---|
 | Serving against vLLM | 104 | One server per engine, 16 or 64 slots of 512 tokens. `bench/loadgen.py` in a closed loop: prompts of about 250 random-word tokens, 128 output tokens, temperature 0, 64 requests per run. Throughput, time to first token (p50) and inter-token latency from the same runs, followed by the batched text check. |
+| Batched generation | 107 | 1-64 sequences decoding together after a 256-token prefill, a warm-up and a timed pass of 64 steps from a cleared cache, logits of every sequence copied to the host. Sharplight: `BatchBench --modes download --refill`. llama.cpp: `llama-batched-bench -npp 256 -ntg 64`. Mean step time of the 64 timed steps on both sides, average of two rounds. |
+| Experts in system memory | 107 | llama-bench's procedure on both sides: one warm-up, 5 runs, mean of the per-run tokens per second. Prefill of 512 tokens; generation of 64 tokens after a 512-token prompt. Sharplight: `--cpu-offload --bench 512`. llama.cpp: `llama-bench -ncmoe N` at its fastest N. Average of three rounds. |
 | Experts on disk | 85, 87 | Greedy text of up to 24 tokens after the same prompt, each engine's reported generation speed. Sharplight reads experts into a fixed cache; llama.cpp memory-maps the file. Same memory limits for both. |
 | Single stream | 34 | Generation ("tg"): output tokens per second at a stated context depth. Sharplight: `--bench N`, several process runs, median decode step. llama.cpp: `llama-bench -r 5`, median. |
 | Serving throughput | 34.3 | One server per engine, 64 slots, 512-token contexts. Prompts of about 250 random-word tokens, 128 output tokens at temperature 0, at 1, 4, 16 and 64 simultaneous requests. 2 rounds each, median, with time to first token and inter-token latency. |
