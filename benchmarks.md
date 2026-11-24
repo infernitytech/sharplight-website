@@ -90,6 +90,9 @@ build.
 - **Gemma 4 31B on CUDA against llama.cpp**: 512-token prompts 0.89x, single-stream generation 0.96x, generation after a
   128K-token prompt 0.80x (section 79).
 - **Qwen3-Coder-Next with experts in system memory, CUDA**: generation 0.95x of llama.cpp (section 107).
+- **gpt-oss-120b MXFP4 with experts in system memory, CUDA**: 512-token prompts 0.47x of llama.cpp (about 300 against
+  637 tokens/s, llama.cpp reading the weights into memory with `-lm none`; llama-bench's mean of 5 runs on both sides,
+  section 107). Generation could not be measured fairly on the test machine: the 63.4 GB file is larger than its memory.
 - **Gemma 4 31B, one sequence, CUDA**: 0.98x of llama.cpp in the batched-generation test (section 107).
 - **GLM-5.2 from disk**: 0.75x of llama.cpp in a first run with an empty expert cache; the first prompt of DeepSeek-V4-Flash
   takes 6.0 s against llama.cpp's 2.0 s (section 87).
