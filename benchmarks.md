@@ -3,7 +3,7 @@ title: Benchmarks
 lead: Sharplight next to vLLM, llama.cpp and onnxruntime on the same weights, including where the other engine is ahead.
 description: Reproducible Sharplight benchmarks against vLLM, llama.cpp and onnxruntime, with method, hardware, versions and caveats.
 permalink: /benchmarks/
-charts: [serving-vllm, ttft-vllm, batched-decode-vulkan, batched-decode-cuda, moe-offload, disk-moe, onnx-strict, onnx-fast, decode-llamacpp, serving-throughput, serving-throughput-moe, vllm-decode, prefill-vllm, prefill-llamacpp]
+charts: [serving-vllm, ttft-vllm, disk-moe, onnx-strict, onnx-fast, decode-llamacpp, serving-throughput, serving-throughput-moe, vllm-decode, prefill-vllm, prefill-llamacpp]
 ---
 
 ## Read this first
@@ -24,10 +24,7 @@ One NVIDIA RTX PRO 4500 Blackwell (32 GB), November 2026.
 |---|---|---|
 | vLLM, serving throughput, 16 and 64 streams (identical weights) | 0.99-1.03x: parity | 104 |
 | vLLM, time to first token at 16 / 64 streams | 0.44-0.55x / 0.64-0.70x of vLLM's time | 104 |
-| llama.cpp Vulkan, batched generation, 16-64 sequences (same GGUF files) | 1.77-3.39x | 83 |
-| llama.cpp CUDA, batched generation, 16-64 sequences | 1.09-2.05x | 77, 79 |
-| llama.cpp, MoE models with experts on the CPU | 1.41-1.51x on Vulkan; 0.86-1.25x on CUDA | 66-71 |
-| llama.cpp, MoE models larger than memory, experts read from disk | 0.75-1.56x | 85, 87 |
+| llama.cpp, MoE models larger than memory, experts read from disk (same GGUF files) | 0.75-1.56x | 85, 87 |
 | onnxruntime CUDA provider, ONNX models at the same precision setting | 0.06-0.88x of its latency (f32), 0.37-0.87x (TF32 class); TensorRT is ahead on seven of 19 rows | 99 |
 | llama.cpp, single-stream generation | 0.88-0.99x of CUDA, 0.99-1.09x of Vulkan | 34 |
 
@@ -39,20 +36,9 @@ The same Hugging Face checkpoints on both engines; Sharplight on its CUDA provid
 
 {% include benchmark-chart.html id="ttft-vllm" %}
 
-## Batched generation against llama.cpp
+## Models larger than memory
 
-The same GGUF files; each Sharplight provider against llama.cpp's backend for the same API.
-
-{% include benchmark-chart.html id="batched-decode-vulkan" %}
-
-{% include benchmark-chart.html id="batched-decode-cuda" %}
-
-## Models larger than the GPU
-
-Mixture-of-experts models whose experts do not fit in 32 GB of VRAM: experts in system memory, or read from disk when the
-model is larger than memory and VRAM together.
-
-{% include benchmark-chart.html id="moe-offload" %}
+Mixture-of-experts models larger than system memory and VRAM together, with experts read from disk.
 
 {% include benchmark-chart.html id="disk-moe" %}
 
@@ -90,7 +76,6 @@ build.
   tokens, 0.74-0.88x on every model at 8192 tokens.
 - **Gemma 4 31B on CUDA against llama.cpp**: 512-token prompts 0.89x, single-stream generation 0.96x, generation after a
   128K-token prompt 0.80x (section 79).
-- **Qwen3-Coder-Next with experts on the CPU, CUDA**: 0.86x of llama.cpp (section 71).
 - **GLM-5.2 from disk**: 0.75x of llama.cpp in a first run with an empty expert cache; the first prompt of DeepSeek-V4-Flash
   takes 6.0 s against llama.cpp's 2.0 s (section 87).
 - **TensorRT**: ahead on convnext-tiny, mobilesam, yolov10n, ssd-10, segformer-b0 (batch 1) and resnet50 (batch 8) by
@@ -116,11 +101,7 @@ Scripts are in `bench/`; model paths are placeholders.
 FIRST=1 CONCS="16 64" ROUNDS=1 bench/s16_serve.sh sharplight qwen <Qwen3-8B-FP8> "16 64" --provider cuda
 FIRST=1 CONCS="16 64" ROUNDS=1 bench/s16_serve.sh vllm qwen <Qwen3-8B-FP8> "16 64" --gpu-memory-utilization 0.6
 
-# Batched generation against llama.cpp (sections 79 and 83), both engines per provider
-LENS=" " DEPTHS=" " SEQS="16 32 48 64" BCTX=512 bench/s74_feed.sh out qwen3-8b <Qwen3-8B-Q4_K_M.gguf> vulkan
-
-# Experts on the CPU (sections 66-71) and on disk (sections 85 and 87)
-sharplight <model.gguf> --provider cuda --cpu-offload --bench 512
+# Experts on disk (sections 85 and 87)
 sharplight <model.gguf> --provider cuda --cpu-offload --experts-on-disk --expert-cache 24G --ctx 4096 -p "The capital of France is" -n 24
 
 # ONNX (section 99)

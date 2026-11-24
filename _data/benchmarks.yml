@@ -1,6 +1,6 @@
 # Benchmark charts for /benchmarks/ (and one chart on the home page).
 # Every number is copied from docs/benchmarks.md in the engine repository or computed from the raw files under
-# bench/results/ it cites (wall-clock rates, means of listed runs); `source` names the section, table or file.
+# bench/results/ it cites; `source` names the section, table or file.
 #
 # Schema (the implementation's schema, plus optional fields marked +):
 # - id: unique slug (also the anchor on /benchmarks/)
@@ -91,110 +91,6 @@
       results: [{ engine: Sharplight, value: 160 }, { engine: vLLM, value: 362 }]
     - label: Llama-3.1-8B bf16, 64 streams
       results: [{ engine: Sharplight, value: 489 }, { engine: vLLM, value: 697 }]
-
-- id: batched-decode-vulkan
-  title: Batched generation against llama.cpp, Vulkan backends
-  unit: tokens/s
-  higher_is_better: true
-  description: Output tokens per second when 16 to 64 sequences decode together, same GGUF files, both engines on Vulkan.
-  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), NVIDIA Vulkan driver.
-  versions: Sharplight develop as of 2026-11-22 (Vulkan provider; log section 83); llama.cpp b11177, official Vulkan build, -ngl 99 -fa 1.
-  methodology: >-
-    Decode steps of 16, 32, 48 and 64 sequences at a context depth of 256 tokens. Both values are wall-clock time of the decode
-    steps: Sharplight BatchBench --feedback (sequences x 1000 / median wall ms of 20 steps); llama.cpp llama-batched-bench -npp 256
-    -ntg 64 (S_TG over 64 steps), run twice in the same session, the better pass shown.
-  caveats:
-    - Sharplight is 1.77-3.39x of llama.cpp's Vulkan backend here, most at 16 sequences.
-    - The engine log's tables use Sharplight's minimum GPU time per step; the chart uses wall-clock time instead, which is 1-6 % slower.
-    - The models are Qwen3-8B, Qwen3.8-27B and Gemma 4 31B-it, all Q4_K_M. Gemma 4 31B at more than 16 sequences does not fit next to the weights on this card.
-  source: "docs/benchmarks.md section 83.1; bench/results/s83/final"
-  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
-  date: 2026-11-22
-  groups:
-    - label: Qwen3-8B Q4_K_M, 16 sequences
-      results: [{ engine: Sharplight, value: 1649 }, { engine: llama.cpp Vulkan, value: 592 }]
-    - label: Qwen3-8B Q4_K_M, 32 sequences
-      results: [{ engine: Sharplight, value: 2218 }, { engine: llama.cpp Vulkan, value: 1034 }]
-    - label: Qwen3-8B Q4_K_M, 48 sequences
-      results: [{ engine: Sharplight, value: 2667 }, { engine: llama.cpp Vulkan, value: 1372 }]
-    - label: Qwen3-8B Q4_K_M, 64 sequences
-      results: [{ engine: Sharplight, value: 2869 }, { engine: llama.cpp Vulkan, value: 1620 }]
-    - label: Qwen3.8-27B Q4_K_M, 16 sequences
-      results: [{ engine: Sharplight, value: 490 }, { engine: llama.cpp Vulkan, value: 144 }]
-    - label: Qwen3.8-27B Q4_K_M, 32 sequences
-      results: [{ engine: Sharplight, value: 627 }, { engine: llama.cpp Vulkan, value: 216 }]
-    - label: Qwen3.8-27B Q4_K_M, 48 sequences
-      results: [{ engine: Sharplight, value: 722 }, { engine: llama.cpp Vulkan, value: 260 }]
-    - label: Qwen3.8-27B Q4_K_M, 64 sequences
-      results: [{ engine: Sharplight, value: 775 }, { engine: llama.cpp Vulkan, value: 296 }]
-    - label: Gemma 4 31B Q4_K_M, 16 sequences
-      results: [{ engine: Sharplight, value: 402 }, { engine: llama.cpp Vulkan, value: 155 }]
-
-- id: batched-decode-cuda
-  title: Batched generation against llama.cpp, CUDA
-  unit: tokens/s
-  higher_is_better: true
-  description: The same test with Sharplight's CUDA provider against llama.cpp's CUDA backend, same GGUF files.
-  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), CUDA 13.2.
-  versions: Sharplight develop as of 2026-11-22 (CUDA provider; log sections 77 and 79); llama.cpp b11177, official CUDA 13 build, -ngl 99 -fa 1.
-  methodology: As the Vulkan chart. Wall-clock time of the decode steps on both sides; llama.cpp's better pass of two.
-  caveats:
-    - Sharplight is 1.33-1.35x of llama.cpp on Qwen3-8B, 1.68-2.05x on Qwen3.8-27B and 1.09x on Gemma 4 31B.
-    - Single-stream generation on these files is level with llama.cpp CUDA (Qwen3-8B, Qwen3.8-27B) or behind it (Gemma 4 31B, see below).
-  source: "docs/benchmarks.md sections 77.1 (Gemma 4) and 79.1; bench/results/s77/final3, s79/final"
-  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
-  date: 2026-11-22
-  groups:
-    - label: Qwen3-8B Q4_K_M, 16 sequences
-      results: [{ engine: Sharplight, value: 1905 }, { engine: llama.cpp CUDA, value: 1425 }]
-    - label: Qwen3-8B Q4_K_M, 32 sequences
-      results: [{ engine: Sharplight, value: 2870 }, { engine: llama.cpp CUDA, value: 2125 }]
-    - label: Qwen3-8B Q4_K_M, 48 sequences
-      results: [{ engine: Sharplight, value: 3451 }, { engine: llama.cpp CUDA, value: 2581 }]
-    - label: Qwen3-8B Q4_K_M, 64 sequences
-      results: [{ engine: Sharplight, value: 3765 }, { engine: llama.cpp CUDA, value: 2833 }]
-    - label: Qwen3.8-27B Q4_K_M, 16 sequences
-      results: [{ engine: Sharplight, value: 533 }, { engine: llama.cpp CUDA, value: 317 }]
-    - label: Qwen3.8-27B Q4_K_M, 32 sequences
-      results: [{ engine: Sharplight, value: 766 }, { engine: llama.cpp CUDA, value: 392 }]
-    - label: Qwen3.8-27B Q4_K_M, 48 sequences
-      results: [{ engine: Sharplight, value: 852 }, { engine: llama.cpp CUDA, value: 425 }]
-    - label: Qwen3.8-27B Q4_K_M, 64 sequences
-      results: [{ engine: Sharplight, value: 909 }, { engine: llama.cpp CUDA, value: 444 }]
-    - label: Gemma 4 31B Q4_K_M, 16 sequences
-      results: [{ engine: Sharplight, value: 416 }, { engine: llama.cpp CUDA, value: 383 }]
-
-- id: moe-offload
-  title: Large MoE models with experts on the CPU, against llama.cpp
-  unit: tokens/s
-  higher_is_better: true
-  description: Single-stream generation of MoE models larger than the GPU, with routed experts in system memory and the rest on the GPU, same GGUF files.
-  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit); AMD EPYC 7443 with 10 threads (AVX2) and 62 GB of memory.
-  versions: Sharplight develop as of 2026-11-21 (log sections 66-71), --cpu-offload; llama.cpp b11177, official CUDA 13 and Vulkan builds, -ngl 99 -fa 1 -t 10 with -ncmoe swept and the fastest value shown.
-  methodology: >-
-    64 generated tokens after the prompt. Sharplight: --cpu-offload --bench, median step of 64. llama.cpp: llama-bench -n 64,
-    mean of its 3-5 repetitions at its fastest -ncmoe. Where the log lists several runs (interleaved with llama.cpp in
-    the same hour where possible), the chart shows the mean of the runs for each engine.
-  caveats:
-    - On Vulkan Sharplight is 1.41-1.51x of llama.cpp's Vulkan backend; on CUDA 1.25x on gpt-oss-120b, level on Qwen3.5-122B and 0.86x on Qwen3-Coder-Next.
-    - These runs vary by 5-15 % between identical runs, because of the CPU expert layers' memory traffic.
-    - Prompt processing (512 tokens, Qwen3.5-122B and Qwen3-Coder-Next) is 1.27-1.38x of llama.cpp on Vulkan and 1.03-1.11x on CUDA.
-  source: "docs/benchmarks.md sections 66.1, 69.1, 71.1"
-  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
-  date: 2026-11-21
-  groups:
-    - label: gpt-oss-120b MXFP4 (63 GB), CUDA
-      results: [{ engine: Sharplight, value: 45.5 }, { engine: llama.cpp CUDA, value: 36.4 }]
-    - label: gpt-oss-120b MXFP4 (63 GB), Vulkan
-      results: [{ engine: Sharplight, value: 49.3 }, { engine: llama.cpp Vulkan, value: 33.6 }]
-    - label: Qwen3.5-122B-A10B UD-IQ2_XXS (36.6 GB), CUDA
-      results: [{ engine: Sharplight, value: 74.1 }, { engine: llama.cpp CUDA, value: 71.7 }]
-    - label: Qwen3.5-122B-A10B UD-IQ2_XXS (36.6 GB), Vulkan
-      results: [{ engine: Sharplight, value: 64.6 }, { engine: llama.cpp Vulkan, value: 45.9 }]
-    - label: Qwen3-Coder-Next Q4_K_M, CUDA
-      results: [{ engine: Sharplight, value: 82.0 }, { engine: llama.cpp CUDA, value: 95.8 }]
-    - label: Qwen3-Coder-Next Q4_K_M, Vulkan
-      results: [{ engine: Sharplight, value: 83.2 }, { engine: llama.cpp Vulkan, value: 55.2 }]
 
 - id: disk-moe
   title: MoE models larger than memory, experts streamed from disk

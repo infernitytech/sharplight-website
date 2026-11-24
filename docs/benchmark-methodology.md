@@ -32,7 +32,7 @@ with before and after numbers, dropped experiments and open gaps. Each chart nam
 | | |
 |---|---|
 | GPU | NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), CUDA 13.2 |
-| CPU and memory | AMD EPYC 7443, 10 threads, 62 GB (the tests with experts in system memory or on disk) |
+| CPU and memory | AMD EPYC 7443, 10 threads, 62 GB (the tests with experts on disk) |
 | Disk | NVMe SSD reading 7.4 GB/s (the tests with experts on disk) |
 | Sharplight | Release build of the development branch at the commit or date named per chart; CUDA or Vulkan provider as named |
 | llama.cpp | b11177, official CUDA 13 and Vulkan builds, `-ngl 99 -fa 1` |
@@ -46,16 +46,11 @@ Log entries before 2026-11-15 are from a different GPU (RTX PRO 6000 Blackwell M
 | Test | Log sections | Method |
 |---|---|---|
 | Serving against vLLM | 104 | One server per engine, 16 or 64 slots of 512 tokens. `bench/loadgen.py` in a closed loop: prompts of about 250 random-word tokens, 128 output tokens, temperature 0, 64 requests per run. Throughput, time to first token (p50) and inter-token latency from the same runs, followed by the batched text check. |
-| Batched generation | 77, 79, 83 | 16-64 sequences decoding together at a context depth of 256. Sharplight: `BatchBench --feedback`, median wall-clock time of 20 steps. llama.cpp: `llama-batched-bench -npp 256 -ntg 64` (S_TG over 64 steps), better of two passes. |
-| Experts on the CPU | 66-71 | Single stream, 64 generated tokens. Sharplight: `--cpu-offload --bench`, median step. llama.cpp: `llama-bench -ncmoe N`, mean of 3-5 repetitions at the fastest N. |
 | Experts on disk | 85, 87 | Greedy text of up to 24 tokens after the same prompt, each engine's reported generation speed. Sharplight reads experts into a fixed cache; llama.cpp memory-maps the file. Same memory limits for both. |
 | Single stream | 34, 36, 39 | Prompt processing ("pp512", "pp2048"): prompt tokens per second at that prompt length. Generation ("tg"): output tokens per second at a stated context depth. Sharplight: `--bench N`, several process runs, best prefill of 4 per run, median decode step. llama.cpp: `llama-bench -r 5`. vLLM: `bench/vllm_single.py`, median of 5. |
 | Serving throughput | 34.3 | One server per engine, 64 slots, 512-token contexts. Prompts of about 250 random-word tokens, 128 output tokens at temperature 0, at 1, 4, 16 and 64 simultaneous requests. 2 rounds each, median, with time to first token and inter-token latency. |
 | Prompt processing | 40.9 | Prompts of 512, 2048 and 8192 random token ids, no prefix caching, one warm-up and 5 timed prefills per length, median of the 5 on every side. |
 | ONNX latency | 99 | `bench/onnx/parity_bench.py`: every measurement in its own process, engines of one model back to back, rounds interleaved, minimum wall-clock latency including the read-back of the outputs. Accuracy is checked against a reference in the same run. |
-
-llama-bench and llama-batched-bench report a mean over their steps; the Sharplight side of those charts is the median
-step of the same run length, as stated on each chart.
 
 ## What the numbers do not show
 
