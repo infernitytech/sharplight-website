@@ -1,78 +1,102 @@
 ---
 title: Benchmarks
-lead: Sharplight next to llama.cpp, vLLM and onnxruntime, including where the other engine is ahead.
-description: Reproducible Sharplight benchmarks against llama.cpp, vLLM and onnxruntime, with method, hardware, versions and caveats.
+lead: Sharplight next to vLLM, llama.cpp and onnxruntime on the same weights, including where the other engine is ahead.
+description: Reproducible Sharplight benchmarks against vLLM, llama.cpp and onnxruntime, with method, hardware, versions and caveats.
 permalink: /benchmarks/
-charts: [decode-llamacpp, prefill-llamacpp, serving-throughput, serving-throughput-moe, vllm-decode, prefill-vllm, vllm-ttft, onnx-latency]
+charts: [serving-vllm, ttft-vllm, batched-decode-vulkan, batched-decode-cuda, moe-offload, disk-moe, onnx-strict, onnx-fast, decode-llamacpp, serving-throughput, serving-throughput-moe, vllm-decode, prefill-vllm, prefill-llamacpp]
 ---
 
 ## Read this first
 
-- Our own measurements on one GPU model, with the same model files and settings for every engine. Re-run the scripts on your hardware.
-- Every chart names hardware, engine versions, date and method, and links to its section of the engine's benchmark log.
-  Raw results: `bench/results/`.
+- Our own measurements on one GPU model. Every comparison uses the same model files, the same precision class, the same
+  procedure and the same statistic for every engine. Re-run the scripts on your hardware.
+- Every chart names hardware, engine versions, Sharplight provider (CUDA or Vulkan), date and method, and links to its
+  section of the engine's benchmark log. Raw results: `bench/results/`.
 - Axes start at zero. Differences under about 5 % are noise.
 - Other engines run official builds with their recommended fast settings. If a setting is unfair,
   [open an issue](https://github.com/infernitytech/sharplight/issues) and we re-measure.
 
 ## Summary
 
-One NVIDIA RTX PRO 4500 (32 GB), November 2026. Sharplight runs on Vulkan in every test.
+One NVIDIA RTX PRO 4500 Blackwell (32 GB), November 2026.
 
-| Comparison | Sharplight relative to it |
-|---|---|
-| llama.cpp CUDA, single-stream generation (same GGUF files) | 0.88-0.99x |
-| llama.cpp Vulkan, single-stream generation | 0.99-1.09x |
-| llama.cpp CUDA, prompt processing (same GGUF files, 512-8192 tokens) | 0.84-1.65x: ahead on Qwen3-0.6B, mixed on Llama-3.2-1B, 0.93-0.95x on Qwen3-8B |
-| llama.cpp server, 1 to 64 streams | 1.1-4.4x |
-| vLLM, generation (identical weights) | 0.95-1.08x |
-| vLLM, prompt processing (identical weights, 512-8192 tokens) | 0.70-2.02x: 0.87-0.90x on Qwen3-8B bf16, 0.70-0.74x on Qwen3-8B FP8 |
-| onnxruntime CUDA provider, batch 1 | faster on most measured models; TensorRT is ahead on several |
+| Comparison | Sharplight relative to it | Log section |
+|---|---|---|
+| vLLM, serving throughput, 16 and 64 streams (identical weights) | 0.99-1.03x: parity | 104 |
+| vLLM, time to first token at 16 / 64 streams | 0.44-0.55x / 0.64-0.70x of vLLM's time | 104 |
+| llama.cpp Vulkan, batched generation, 16-64 sequences (same GGUF files) | 1.77-3.39x | 83 |
+| llama.cpp CUDA, batched generation, 16-64 sequences | 1.09-2.05x | 77, 79 |
+| llama.cpp, MoE models with experts on the CPU | 1.41-1.51x on Vulkan; 0.86-1.25x on CUDA | 66-71 |
+| llama.cpp, MoE models larger than memory, experts read from disk | 0.75-1.56x | 85, 87 |
+| onnxruntime CUDA provider, ONNX models at the same precision setting | 0.06-0.88x of its latency (f32), 0.37-0.87x (TF32 class); TensorRT is ahead on seven of 19 rows | 99 |
+| llama.cpp, single-stream generation | 0.88-0.99x of CUDA, 0.99-1.09x of Vulkan | 34 |
 
-## llama.cpp
+## Serving against vLLM
 
-Same GGUF files; llama.cpp with its CUDA and its Vulkan backend.
+The same Hugging Face checkpoints on both engines; Sharplight on its CUDA provider.
+
+{% include benchmark-chart.html id="serving-vllm" %}
+
+{% include benchmark-chart.html id="ttft-vllm" %}
+
+## Batched generation against llama.cpp
+
+The same GGUF files; each Sharplight provider against llama.cpp's backend for the same API.
+
+{% include benchmark-chart.html id="batched-decode-vulkan" %}
+
+{% include benchmark-chart.html id="batched-decode-cuda" %}
+
+## Models larger than the GPU
+
+Mixture-of-experts models whose experts do not fit in 32 GB of VRAM: experts in system memory, or read from disk when the
+model is larger than memory and VRAM together.
+
+{% include benchmark-chart.html id="moe-offload" %}
+
+{% include benchmark-chart.html id="disk-moe" %}
+
+## ONNX
+
+Sharplight's CUDA provider against onnxruntime's CUDA provider at the same precision setting. "Strict" (Sharplight's
+default) and onnxruntime with TF32 off keep f32 accuracy in matrix products; Sharplight's opt-in "fast" mode and
+onnxruntime's default TF32 are in the same reduced-precision class.
+
+{% include benchmark-chart.html id="onnx-strict" %}
+
+{% include benchmark-chart.html id="onnx-fast" %}
+
+## Earlier measurements
+
+Measured with the Vulkan provider on 2026-11-15 to 2026-11-17 (log sections 34-40) and not yet repeated with the current
+build.
 
 {% include benchmark-chart.html id="decode-llamacpp" %}
-
-{% include benchmark-chart.html id="prefill-llamacpp" %}
-
-## Serving
-
-One server per engine, the same load generator, 1 to 64 simultaneous requests.
 
 {% include benchmark-chart.html id="serving-throughput" %}
 
 {% include benchmark-chart.html id="serving-throughput-moe" %}
 
-Here vLLM ran bf16 checkpoints and the other two engines quantized GGUF files. The next section removes that difference.
-
-## vLLM on identical weights
-
-The same Hugging Face checkpoints (bf16; FP8 for the FP8 checkpoint). vLLM on CUDA.
-
 {% include benchmark-chart.html id="vllm-decode" %}
 
 {% include benchmark-chart.html id="prefill-vllm" %}
 
-{% include benchmark-chart.html id="vllm-ttft" %}
-
-## ONNX
-
-{% include benchmark-chart.html id="onnx-latency" %}
-
-"Strict" (default) keeps f32 accuracy in matrix products. "Fast" (opt-in) is in the accuracy class of TF32, the default
-of onnxruntime's CUDA provider, and is the like-for-like comparison.
+{% include benchmark-chart.html id="prefill-llamacpp" %}
 
 ## Where Sharplight is behind
 
-- **Prompt processing against vLLM**: 0.70-0.90x on Qwen3-8B (bf16 and FP8) at every length, 0.87x on the two small
-  models at 8192 tokens; hence 0.68-0.78x total throughput at 16 streams with long prompts.
-- **Time to first token on 8B models**: 300 ms against vLLM's 239 ms on Qwen3-8B for one stream; also later at 16 streams.
-- **64 streams on Llama-3.2-1B**: 0.75x of vLLM.
-- **Single-stream generation against llama.cpp CUDA**: 1 to 12 % behind, most on the smallest models.
-- **Prompt processing against llama.cpp CUDA**: 0.93-0.95x on Qwen3-8B Q4_K_M, 0.84x on Llama-3.2-1B at 512 tokens.
-- **TensorRT**: ahead on ConvNeXt, YOLOv10n, MobileSAM and other rows.
+- **Inter-token latency tail against vLLM at 16 streams**: p99 48-85 ms against 21-28 ms, mean 2-5 % higher (section 104).
+- **Prompt processing against vLLM** (Vulkan provider, section 40): 0.70-0.90x on Qwen3-8B (bf16 and FP8) at 512-8192
+  tokens, 0.74-0.88x on every model at 8192 tokens.
+- **Gemma 4 31B on CUDA against llama.cpp**: 512-token prompts 0.89x, single-stream generation 0.96x, generation after a
+  128K-token prompt 0.80x (section 79).
+- **Qwen3-Coder-Next with experts on the CPU, CUDA**: 0.86x of llama.cpp (section 71).
+- **GLM-5.2 from disk**: 0.75x of llama.cpp in a first run with an empty expert cache; the first prompt of DeepSeek-V4-Flash
+  takes 6.0 s against llama.cpp's 2.0 s (section 87).
+- **TensorRT**: ahead on convnext-tiny, mobilesam, yolov10n, ssd-10, segformer-b0 (batch 1) and resnet50 (batch 8) by
+  1.08-1.23x (section 99).
+- **Single-stream generation against llama.cpp CUDA** (Vulkan provider, section 34): 1 to 12 % behind, most on the smallest
+  models.
 
 ## Not measured here
 
@@ -85,16 +109,24 @@ of onnxruntime's CUDA provider, and is the like-for-like comparison.
 
 ## Reproduce
 
-Scripts are in `bench/`. The vLLM comparison:
+Scripts are in `bench/`; model paths are placeholders.
 
 ```bash
-export SHARPLIGHT_VK_DEVICES=1 CUDA_VISIBLE_DEVICES=1 VLLM_VENV=<venv> HF_DIR=<checkpoints> OUT_DIR=bench/results/mine
-bench/s38_all.sh vllm
-bench/s38_all.sh sharplight after
-python3 bench/s38_summarize.py bench/results/mine after
+# Serving against vLLM (section 104): one server per engine, then the load generator and the batched text check
+FIRST=1 CONCS="16 64" ROUNDS=1 bench/s16_serve.sh sharplight qwen <Qwen3-8B-FP8> "16 64" --provider cuda
+FIRST=1 CONCS="16 64" ROUNDS=1 bench/s16_serve.sh vllm qwen <Qwen3-8B-FP8> "16 64" --gpu-memory-utilization 0.6
+
+# Batched generation against llama.cpp (sections 79 and 83), both engines per provider
+LENS=" " DEPTHS=" " SEQS="16 32 48 64" BCTX=512 bench/s74_feed.sh out qwen3-8b <Qwen3-8B-Q4_K_M.gguf> vulkan
+
+# Experts on the CPU (sections 66-71) and on disk (sections 85 and 87)
+sharplight <model.gguf> --provider cuda --cpu-offload --bench 512
+sharplight <model.gguf> --provider cuda --cpu-offload --experts-on-disk --expert-cache 24G --ctx 4096 -p "The capital of France is" -n 24
+
+# ONNX (section 99)
+python3 bench/onnx/parity_bench.py run gpu.jsonl --rounds 2 --engines sl-cuda,sl-cuda-fast,ort-cuda,ort-cuda-strict
 ```
 
-llama.cpp: `bench/s34_single_all.sh` (single stream), `bench/s16_serve.sh` (serving). ONNX: `bench/onnx/parity_bench.py`.
 Full log, including dropped experiments and open gaps:
 [docs/benchmarks.md](https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md).
 [Method]({{ '/docs/benchmark-methodology/' | relative_url }})

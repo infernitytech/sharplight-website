@@ -64,13 +64,14 @@ var completion = await generator.GenerateAsync("The capital of France is", new G
 
 ## Performance
 
-One NVIDIA RTX PRO 4500, November 2026, our own measurements:
+One NVIDIA RTX PRO 4500, November 2026, our own measurements on the same weights for every engine:
 
-- Single-stream decode: 0.88-0.99x of llama.cpp CUDA.
-- Multi-stream serving: 1.1-4.4x of llama.cpp's server.
-- vLLM, identical weights: decode 0.95-1.08x, prompt processing 0.73-1.01x at 2048 tokens.
+- vLLM: serving throughput at parity (0.99-1.03x), first token in about half the time at 16 streams.
+- llama.cpp, same GGUF files: batched generation 1.8-3.4x on Vulkan and 1.1-2.1x on CUDA.
+- MoE models larger than the GPU: 1.4-1.5x of llama.cpp on Vulkan with experts in system memory; DeepSeek-V3.1 (405 GB) read from disk at 1.6x on one 32 GB GPU.
+- ONNX on CUDA: faster than onnxruntime's CUDA provider on every measured model at the same precision setting.
 
-{% include benchmark-chart.html id="serving-throughput" %}
+{% include benchmark-chart.html id="ttft-vllm" %}
 
 [Method and caveats]({{ '/benchmarks/' | relative_url }})
 
