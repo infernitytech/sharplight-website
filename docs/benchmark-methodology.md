@@ -47,7 +47,7 @@ Log entries before 2026-11-15 are from a different GPU (RTX PRO 6000 Blackwell M
 |---|---|---|
 | Serving against vLLM | 104 | One server per engine, 16 or 64 slots of 512 tokens. `bench/loadgen.py` in a closed loop: prompts of about 250 random-word tokens, 128 output tokens, temperature 0, 64 requests per run. Throughput, time to first token (p50) and inter-token latency from the same runs, followed by the batched text check. |
 | Experts on disk | 85, 87 | Greedy text of up to 24 tokens after the same prompt, each engine's reported generation speed. Sharplight reads experts into a fixed cache; llama.cpp memory-maps the file. Same memory limits for both. |
-| Single stream | 34, 36, 39 | Prompt processing ("pp512", "pp2048"): prompt tokens per second at that prompt length. Generation ("tg"): output tokens per second at a stated context depth. Sharplight: `--bench N`, several process runs, best prefill of 4 per run, median decode step. llama.cpp: `llama-bench -r 5`. vLLM: `bench/vllm_single.py`, median of 5. |
+| Single stream | 34 | Generation ("tg"): output tokens per second at a stated context depth. Sharplight: `--bench N`, several process runs, median decode step. llama.cpp: `llama-bench -r 5`, median. |
 | Serving throughput | 34.3 | One server per engine, 64 slots, 512-token contexts. Prompts of about 250 random-word tokens, 128 output tokens at temperature 0, at 1, 4, 16 and 64 simultaneous requests. 2 rounds each, median, with time to first token and inter-token latency. |
 | Prompt processing | 40.9 | Prompts of 512, 2048 and 8192 random token ids, no prefix caching, one warm-up and 5 timed prefills per length, median of the 5 on every side. |
 | ONNX latency | 99 | `bench/onnx/parity_bench.py`: every measurement in its own process, engines of one model back to back, rounds interleaved, minimum wall-clock latency including the read-back of the outputs. Accuracy is checked against a reference in the same run. |
@@ -71,7 +71,7 @@ Scripts are in `bench/`, raw results in `bench/results/s<section>/`.
 # Single stream against llama.cpp (section 34 method)
 GPU_INDEX=0 bench/s34_single_all.sh sharplight     # then: llama-cuda13, llama-vulkan (model paths: bench/models.sh)
 
-# Against vLLM on identical checkpoints (sections 38 and 39)
+# Prompt processing against vLLM on identical checkpoints (section 38 method)
 export SHARPLIGHT_VK_DEVICES=0 CUDA_VISIBLE_DEVICES=0 VLLM_VENV=<venv> HF_DIR=<checkpoints> OUT_DIR=bench/results/mine
 bench/s38_all.sh vllm
 bench/s38_all.sh sharplight after

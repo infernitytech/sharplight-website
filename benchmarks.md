@@ -3,7 +3,7 @@ title: Benchmarks
 lead: Sharplight next to vLLM, llama.cpp and onnxruntime on the same weights, including where the other engine is ahead.
 description: Reproducible Sharplight benchmarks against vLLM, llama.cpp and onnxruntime, with method, hardware, versions and caveats.
 permalink: /benchmarks/
-charts: [serving-vllm, ttft-vllm, disk-moe, onnx-strict, onnx-fast, decode-llamacpp, serving-throughput, serving-throughput-moe, vllm-decode, prefill-vllm, prefill-llamacpp]
+charts: [serving-vllm, ttft-vllm, disk-moe, onnx-strict, onnx-fast, decode-llamacpp, serving-throughput, serving-throughput-moe, prefill-vllm, prefill-llamacpp]
 ---
 
 ## Read this first
@@ -62,8 +62,6 @@ build.
 {% include benchmark-chart.html id="serving-throughput" %}
 
 {% include benchmark-chart.html id="serving-throughput-moe" %}
-
-{% include benchmark-chart.html id="vllm-decode" %}
 
 {% include benchmark-chart.html id="prefill-vllm" %}
 

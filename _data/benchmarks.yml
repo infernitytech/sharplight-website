@@ -94,9 +94,9 @@
 
 - id: disk-moe
   title: MoE models larger than memory, experts streamed from disk
-  unit: tokens/s
+  unit: generation speed relative to llama.cpp (1.00)
   higher_is_better: true
-  description: Generation speed of three large MoE models on one 32 GB GPU and 62 GB of system memory, same GGUF files on both engines.
+  description: Generation speed of three large MoE models on one 32 GB GPU and 62 GB of system memory, same GGUF files on both engines, relative to llama.cpp; the tokens per second are under each model.
   hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB); AMD EPYC 7443 with 10 threads and 62 GB of memory for all processes; NVMe SSD reading 7.4 GB/s.
   versions: Sharplight develop as of 2026-11-22 / 2026-11-23 (log sections 85 and 87; CUDA provider, --cpu-offload --experts-on-disk); llama.cpp b11177 CUDA 13 build (-ngl 99 -fa on -t 10, -ncmoe set so the same expert layers stay on the GPU, the model file memory-mapped).
   methodology: >-
@@ -113,11 +113,14 @@
   date: 2026-11-23
   groups:
     - label: DeepSeek-V3.1 Q4_K_M (405 GB)
-      results: [{ engine: Sharplight, value: 0.97 }, { engine: llama.cpp CUDA, value: 0.62 }]
+      results: [{ engine: Sharplight, value: 1.56 }, { engine: llama.cpp CUDA, value: 1.00 }]
+      note: "tokens/s: Sharplight 0.97, llama.cpp 0.62"
     - label: GLM-5.2 UD-Q2_K_XL (254 GB)
-      results: [{ engine: Sharplight, value: 0.41 }, { engine: llama.cpp CUDA, value: 0.55 }]
+      results: [{ engine: Sharplight, value: 0.75 }, { engine: llama.cpp CUDA, value: 1.00 }]
+      note: "tokens/s: Sharplight 0.41, llama.cpp 0.55"
     - label: DeepSeek-V4-Flash UD-IQ1_S (82.5 GB)
-      results: [{ engine: Sharplight, value: 7.2 }, { engine: llama.cpp CUDA, value: 7.15 }]
+      results: [{ engine: Sharplight, value: 1.01 }, { engine: llama.cpp CUDA, value: 1.00 }]
+      note: "tokens/s: Sharplight 7.2, llama.cpp 7.15"
 
 - id: onnx-strict
   title: ONNX latency at f32 accuracy against onnxruntime's CUDA provider
@@ -387,29 +390,6 @@
       results: [{ engine: Sharplight, value: 662 }, { engine: llama.cpp CUDA, value: 411 }]
     - label: gpt-oss-20b, 64 streams
       results: [{ engine: Sharplight, value: 1850 }, { engine: llama.cpp CUDA, value: 1032 }]
-
-- id: vllm-decode
-  title: Generation speed against vLLM on identical weights
-  unit: tokens/s
-  higher_is_better: true
-  description: Single-stream tokens per second after a 16-token prompt, same Hugging Face checkpoints.
-  hardware: One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.91, CUDA 13.2; no other process on the GPU during the runs.
-  versions: Sharplight branch perf/llm-r4 on develop at 31717994 (Vulkan provider); vLLM 0.33.0.
-  methodology: Sharplight median decode step over 2 process runs; vLLM median of 5 ("tg@d16").
-  caveats:
-    - Level within measurement noise (1.00-1.03x). After 8192 tokens of context the range is 0.95-1.08x (same table).
-  source: "docs/benchmarks.md section 39.2 (rows tg@d16)"
-  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md
-  date: 2026-11-17
-  groups:
-    - label: Qwen3-0.6B bf16
-      results: [{ engine: Sharplight, value: 460 }, { engine: vLLM, value: 461 }]
-    - label: Llama-3.2-1B bf16
-      results: [{ engine: Sharplight, value: 294 }, { engine: vLLM, value: 286 }]
-    - label: Qwen3-8B bf16
-      results: [{ engine: Sharplight, value: 53 }, { engine: vLLM, value: 52 }]
-    - label: Qwen3-8B FP8
-      results: [{ engine: Sharplight, value: 89 }, { engine: vLLM, value: 87 }]
 
 - id: prefill-vllm
   title: Prompt processing against vLLM on identical weights
