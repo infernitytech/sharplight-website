@@ -26,7 +26,7 @@ One NVIDIA RTX PRO 4500 Blackwell (32 GB), November 2026.
 | vLLM, time to first token at 16 / 64 streams | 0.44-0.55x / 0.64-0.70x of vLLM's time | 104 |
 | llama.cpp Vulkan, batched generation, 16-64 sequences (same GGUF files, mean step time) | 1.63-3.19x | 107 |
 | llama.cpp CUDA, batched generation, 16-64 sequences (same GGUF files, mean step time) | 1.09-1.96x | 107 |
-| llama.cpp, MoE models with experts in system memory (mean of 5 runs) | 1.43-1.45x generation and 1.22-1.44x prompts on Vulkan; 0.95-1.17x on CUDA | 107 |
+| llama.cpp, MoE models with experts in system memory (mean of 5 runs) | 1.43-1.45x generation and 1.22-1.60x prompts on Vulkan; 0.99-1.60x on CUDA (gpt-oss-120b prompts 0.85x on CUDA, 0.81x on Vulkan) | 107, 111 |
 | llama.cpp, MoE models larger than memory, experts read from disk (same GGUF files) | 0.75-1.56x | 85, 87 |
 | onnxruntime CUDA provider, ONNX models at the same precision setting | 0.06-0.88x of its latency (f32), 0.37-0.87x (TF32 class); TensorRT is ahead on seven of 19 rows | 99 |
 | llama.cpp, single-stream generation | 0.88-0.99x of CUDA, 0.99-1.09x of Vulkan | 34 |
@@ -89,10 +89,11 @@ build.
   tokens, 0.74-0.88x on every model at 8192 tokens.
 - **Gemma 4 31B on CUDA against llama.cpp**: 512-token prompts 0.89x, single-stream generation 0.96x, generation after a
   128K-token prompt 0.80x (section 79).
-- **Qwen3-Coder-Next with experts in system memory, CUDA**: generation 0.95x of llama.cpp (section 107).
-- **gpt-oss-120b MXFP4 with experts in system memory, CUDA**: 512-token prompts 0.47x of llama.cpp (about 300 against
-  637 tokens/s, llama.cpp reading the weights into memory with `-lm none`; llama-bench's mean of 5 runs on both sides,
-  section 107). Generation could not be measured fairly on the test machine: the 63.4 GB file is larger than its memory.
+- **Qwen3-Coder-Next with experts in system memory, CUDA**: generation 0.99x of llama.cpp by the mean of 5 runs; the
+  first run after a load is slower (about 80 against 96 tokens/s), the later ones about 5 % ahead (section 111).
+- **gpt-oss-120b MXFP4 with experts in system memory, CUDA**: 512-token prompts 0.85x of llama.cpp (544 against 640
+  tokens/s; 0.96x when all experts are page-locked, as llama.cpp's `-lm none` keeps them in memory), generation 1.06x
+  ahead (llama-bench's mean of 5 runs on both sides, section 111). On Vulkan, prompts 0.81x and generation 1.19x.
 - **Gemma 4 31B, one sequence, CUDA**: 0.98x of llama.cpp in the batched-generation test (section 107).
 - **GLM-5.2 from disk**: 0.75x of llama.cpp in a first run with an empty expert cache; the first prompt of DeepSeek-V4-Flash
   takes 6.0 s against llama.cpp's 2.0 s (section 87).
