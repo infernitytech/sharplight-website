@@ -45,7 +45,7 @@
     - Checkpoints are Qwen/Qwen3-8B-FP8 (block-scaled FP8), openai/gpt-oss-20b (MXFP4 experts, bf16 rest) and meta-llama/Llama-3.1-8B-Instruct (bf16).
     - Every Sharplight run passed the batched text check; vLLM's gpt-oss-20b run flagged one of 64 batched answers.
   source: "docs/benchmarks.md section 104.3"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1043-serving-develop-against-r44-against-vllm-with-the-text-check
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1043-serving-develop-against-r44-against-vllm-with-the-text-check
   date: 2026-11-24
   groups:
     - label: Qwen3-8B FP8, 16 streams
@@ -77,7 +77,7 @@
     - "The trade-off is in the tail at 16 streams: Sharplight's p99 inter-token latency is 48-85 ms against vLLM's 21-28 ms, and its mean inter-token latency is 2-5 % higher. At 64 streams the p99 is level (116-224 against 120-232 ms) and the mean 1-3 % higher."
     - "For one request alone on a fresh server: 26 against 47 ms (Qwen3-8B FP8), 29 against 37 ms (gpt-oss-20b), 44 against 47 ms (Llama-3.1-8B)."
   source: "docs/benchmarks.md section 104.3"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1043-serving-develop-against-r44-against-vllm-with-the-text-check
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1043-serving-develop-against-r44-against-vllm-with-the-text-check
   date: 2026-11-24
   groups:
     - label: Qwen3-8B FP8, 16 streams
@@ -112,7 +112,7 @@
     - "Sharplight's serving path picks the next token on the GPU and downloads only token ids (its greedy mode), which llama-batched-bench does not do; that mode runs 1.32-1.34x of llama.cpp on Qwen3-8B and 1.68-2.05x on Qwen3.8-27B at 16-64 sequences. The chart shows the like-for-like mode."
     - Gemma 4 31B at 32 or more sequences does not fit next to the weights on this 32 GB card for either engine.
   source: "docs/benchmarks.md section 107.1; bench/results/same-stat/batched"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#ss1-batched-decode-dense-gguf-q4_k_m-all-layers-on-the-gpu
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#ss1-batched-decode-dense-gguf-q4_k_m-all-layers-on-the-gpu
   date: 2026-11-24
   groups:
     - label: Qwen3-8B Q4_K_M, 1 sequence
@@ -169,7 +169,7 @@
     - "Sharplight's serving path (greedy, the next token picked on the GPU, only token ids downloaded) runs 1.78-2.81x of llama.cpp on Qwen3-8B and 2.68-3.36x on Qwen3.8-27B at 16-64 sequences. The chart shows the like-for-like mode."
     - Gemma 4 31B at 32 or more sequences does not fit next to the weights on this 32 GB card for either engine.
   source: "docs/benchmarks.md section 107.1; bench/results/same-stat/batched"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#ss1-batched-decode-dense-gguf-q4_k_m-all-layers-on-the-gpu
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#ss1-batched-decode-dense-gguf-q4_k_m-all-layers-on-the-gpu
   date: 2026-11-24
   groups:
     - label: Qwen3-8B Q4_K_M, 1 sequence
@@ -229,7 +229,7 @@
     - "Sharplight's generation runs spread more than llama.cpp's (± 2-10 % against ± 1-4 %): the first of the five runs is the slowest, as the CPU / GPU split is re-balanced after each reset. The mean includes it."
     - "Model files: Qwen3-Coder-Next Q4_K_M 48.5 GB, Qwen3.5-122B-A10B UD-IQ2_XXS 36.6 GB."
   source: "docs/benchmarks.md section 107.2; bench/results/same-stat/offload"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#ss2-moe-with-cpu-expert-offload
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#ss2-moe-with-cpu-expert-offload
   date: 2026-11-24
   groups:
     - label: Qwen3-Coder-Next Q4_K_M, generation, Vulkan
@@ -274,7 +274,7 @@
     - "With a warm expert cache Sharplight's decode steps reach a median of 12.1 tokens/s on DeepSeek-V4-Flash and 0.99 tokens/s on GLM-5.2; llama.cpp has no comparable warm-cache measurement here."
     - The first prompt is faster on llama.cpp for DeepSeek-V4-Flash (5 tokens in 2.0 s against 6.0 s), twice as fast on Sharplight for DeepSeek-V3.1 (8.1 s against 16.4 s for 6 tokens).
   source: "docs/benchmarks.md sections 85.4, 87.2, 87.10"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#854-against-llamacpp-under-the-same-limits
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#854-against-llamacpp-under-the-same-limits
   date: 2026-11-23
   groups:
     - label: DeepSeek-V3.1 Q4_K_M (405 GB)
@@ -304,7 +304,7 @@
     - Minimum latency, the best case for every engine.
     - "efficientnet-lite4: onnxruntime takes 12.2 ms with TF32 off against 1.4 ms with it on, hence the 0.06x."
   source: "docs/benchmarks.md section 99.5"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#995-onnx-on-cuda-against-onnxruntime-and-tensorrt
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#995-onnx-on-cuda-against-onnxruntime-and-tensorrt
   date: 2026-11-23
   groups:
     - label: resnet50, batch 1
@@ -393,7 +393,7 @@
     - "TensorRT is ahead on convnext-tiny (1.11x and 1.22x of TensorRT's time), mobilesam (1.23x), yolov10n (1.15x), ssd-10 (1.13x), segformer-b0 at batch 1 (1.12x) and resnet50 at batch 8 (1.08x); level on mobilenetv2 and yolov8n; Sharplight is faster on the other nine rows TensorRT builds."
     - Minimum latency, the best case for every engine.
   source: "docs/benchmarks.md section 99.5 (TensorRT: section 98.3)"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#995-onnx-on-cuda-against-onnxruntime-and-tensorrt
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#995-onnx-on-cuda-against-onnxruntime-and-tensorrt
   date: 2026-11-23
   groups:
     - label: resnet50, batch 1
@@ -481,7 +481,7 @@
     - A later round (section 36) moved Qwen3-0.6B to 540 and Llama-3.2-1B to 478 tokens/s; this chart keeps one consistent run for all models.
     - One GPU model. Results on other hardware will differ.
   source: "docs/benchmarks.md section 34.2 (rows tg128 @d0)"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#342-single-stream
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#342-single-stream
   date: 2026-11-15
   groups:
     - label: Qwen3-0.6B Q8_0
@@ -517,7 +517,7 @@
   caveats:
     - Short prompts and short answers; a workload with long prompts stresses prompt processing instead (see the time-to-first-token chart).
   source: "docs/benchmarks.md section 34.3 (both tables, rows llama3.2-1b)"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#343-serving
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#343-serving
   date: 2026-11-15
   groups:
     - label: 1 stream
@@ -540,7 +540,7 @@
   caveats:
     - These models scale less from 4 to 16 streams on Sharplight than Llama-3.2-1B does; the engine log lists that as an open item.
   source: "docs/benchmarks.md section 34.3"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#343-serving
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#343-serving
   date: 2026-11-15
   groups:
     - label: OLMoE, 1 stream
@@ -570,7 +570,7 @@
     - At 8192 tokens Sharplight is behind vLLM on every model (0.74-0.88x).
     - One GPU model. Results on other hardware will differ.
   source: "docs/benchmarks.md section 40.9"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#409-prefill-with-an-identical-procedure-sharplight-vllm-llamacpp
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#409-prefill-with-an-identical-procedure-sharplight-vllm-llamacpp
   date: 2026-11-17
   groups:
     - label: Qwen3-0.6B bf16, 512 tokens
@@ -611,7 +611,7 @@
     - Sharplight is 0.93-0.95x of llama.cpp on Qwen3-8B Q4_K_M at every length and 0.84x on Llama-3.2-1B at 512 tokens.
     - One GPU model. Results on other hardware will differ.
   source: "docs/benchmarks.md section 40.9"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#409-prefill-with-an-identical-procedure-sharplight-vllm-llamacpp
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#409-prefill-with-an-identical-procedure-sharplight-vllm-llamacpp
   date: 2026-11-17
   groups:
     - label: Qwen3-0.6B Q8_0, 512 tokens
@@ -653,7 +653,7 @@
     - "Llama-3.1-8B at 256 streams is limited by KV-cache memory on both engines: vLLM admits and preempts (566 preemptions), Sharplight queues requests instead, so its median time to first token is longer there (4.0 s against 2.1 s)."
     - "With requests arriving at random (Poisson, about 85 % of saturation) Sharplight's median time to first token is 0.43-0.65x of vLLM's at the same or higher throughput (section 105.6)."
   source: "docs/benchmarks.md sections 105.2 and 105.6"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1052-saturation-closed-loop-fixed-and-mixed-lengths
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1052-saturation-closed-loop-fixed-and-mixed-lengths
   date: 2026-11-24
   groups:
     - label: Qwen3-8B FP8, 64 streams
@@ -701,7 +701,7 @@
     - "Checkpoints: RedHatAI/Qwen3-8B-NVFP4 and RedHatAI/Qwen3-30B-A3B-NVFP4 (compressed-tensors). The NVIDIA ModelOpt checkpoint is left out: vLLM serves it with an FP8 KV cache and Sharplight with f16, which is not like-for-like."
     - "Accuracy: wikitext-2 perplexity on the dense checkpoint 9.09 (Sharplight) against 8.98 (vLLM), which uses the checkpoint's calibrated activation scales (section 106.4)."
   source: "docs/benchmarks.md section 106.6"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1066-serving-against-vllm-033
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1066-serving-against-vllm-033
   date: 2026-11-24
   groups:
     - label: Qwen3-8B NVFP4, 1 stream
@@ -741,7 +741,7 @@
     - "Qwen3.5-122B-A10B on Vulkan was not repeated in this round; the earlier round (next chart) has it at 1.45x generation and 1.22x prompts."
     - "Model files: gpt-oss-120b MXFP4 63.4 GB, Qwen3-Coder-Next Q4_K_M 48.5 GB, Qwen3.5-122B-A10B UD-IQ2_XXS 36.6 GB."
   source: "docs/benchmarks.md section 111 (OFF.3)"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#off3-results-against-llamacpp-toks-mean--sd-of-5-runs-rounds-a--b
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#off3-results-against-llamacpp-toks-mean--sd-of-5-runs-rounds-a--b
   date: 2026-11-25
   groups:
     - label: Qwen3-Coder-Next Q4_K_M, generation, Vulkan
@@ -795,7 +795,7 @@
     - "Peak memory (section 108 build): 23.1 against 31.1 GiB at 480p, 21.7 against 30.6 GiB at 720p."
     - "Not repeated with the current build: the 7B model and 65-frame clips, where Sharplight was 1.35x and 1.59x of PyTorch's time before the convolution change (section 108)."
   source: "docs/benchmarks.md sections 110.4 and 108.1"
-  source_url: https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1104-end-to-end
+  source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1104-end-to-end
   date: 2026-11-24
   groups:
     - label: 416 x 240 -> 832 x 480

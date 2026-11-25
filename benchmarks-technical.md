@@ -58,7 +58,7 @@ One NVIDIA RTX PRO 4500 Blackwell (32 GB), November 2026. Ratios are Sharplight'
   <dt>Engines</dt><dd>Sharplight CUDA provider; vLLM 0.33.0, prefix caching off.</dd>
   <dt>Procedure</dt><dd>One server per engine and model; the same load generator (<code>bench/loadgen.py</code>) sends the same requests to both, closed loop, temperature 0; a batched text check after every run.</dd>
   <dt>Statistic</dt><dd>Output tokens per second over the run (or over the steady window at 64-256 streams) and the median time to first token, the same on both engines.</dd>
-  <dt>Log</dt><dd><a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1043-serving-develop-against-r44-against-vllm-with-the-text-check">104.3</a>, <a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1052-saturation-closed-loop-fixed-and-mixed-lengths">105.2</a>, <a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1066-serving-against-vllm-033">106.6</a>, <a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#409-prefill-with-an-identical-procedure-sharplight-vllm-llamacpp">40.9</a></dd>
+  <dt>Log</dt><dd><a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1043-serving-develop-against-r44-against-vllm-with-the-text-check">104.3</a>, <a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1052-saturation-closed-loop-fixed-and-mixed-lengths">105.2</a>, <a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1066-serving-against-vllm-033">106.6</a>, <a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#409-prefill-with-an-identical-procedure-sharplight-vllm-llamacpp">40.9</a></dd>
 </dl>
 
 ### 16 and 64 streams
@@ -89,7 +89,7 @@ Measured with the Vulkan provider on 2026-11-17 (log section 40) and not yet rep
   <dt>Engines</dt><dd>Each Sharplight provider against llama.cpp's backend for the same API: CUDA against llama.cpp's CUDA 13 build, Vulkan against its Vulkan build; llama.cpp b11177, <code>-ngl 99 -fa 1</code>.</dd>
   <dt>Procedure</dt><dd>Batched generation: llama-batched-bench's procedure on both (256-token prompts, 64 decode steps, logits of every sequence copied to the host). Models larger than the GPU: llama-bench's procedure on both (one warm-up, 5 runs of pp512 and of tg64 at depth 512), llama.cpp at its fastest <code>-ncmoe</code>.</dd>
   <dt>Statistic</dt><dd>Mean step time (batched) and mean of the per-run tokens per second (llama-bench), on both engines; two rounds with alternating order where stated.</dd>
-  <dt>Log</dt><dd><a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#ss1-batched-decode-dense-gguf-q4_k_m-all-layers-on-the-gpu">107 SS.1</a>, <a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#ss2-moe-with-cpu-expert-offload">107 SS.2</a>, <a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#off3-results-against-llamacpp-toks-mean--sd-of-5-runs-rounds-a--b">111 OFF.3</a>, <a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#854-against-llamacpp-under-the-same-limits">85.4</a>, <a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#342-single-stream">34</a></dd>
+  <dt>Log</dt><dd><a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#ss1-batched-decode-dense-gguf-q4_k_m-all-layers-on-the-gpu">107 SS.1</a>, <a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#ss2-moe-with-cpu-expert-offload">107 SS.2</a>, <a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#off3-results-against-llamacpp-toks-mean--sd-of-5-runs-rounds-a--b">111 OFF.3</a>, <a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#854-against-llamacpp-under-the-same-limits">85.4</a>, <a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#342-single-stream">34</a></dd>
 </dl>
 
 ### Batched generation
@@ -131,7 +131,7 @@ build.
   <dt>Precision</dt><dd>Compared within one precision class: Sharplight "strict" (its default) against onnxruntime with TF32 off; Sharplight "fast" against onnxruntime's default TF32 and TensorRT with TF32 tactics.</dd>
   <dt>Procedure</dt><dd><code>bench/onnx/parity_bench.py</code>: every measurement in its own process, engines of one model back to back, two interleaved rounds, outputs checked against onnxruntime's.</dd>
   <dt>Statistic</dt><dd>Minimum wall-clock latency of one run including the read-back of every output, minimum over the rounds, on every engine.</dd>
-  <dt>Log</dt><dd><a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#995-onnx-on-cuda-against-onnxruntime-and-tensorrt">99.5</a> (TensorRT: 98.3)</dd>
+  <dt>Log</dt><dd><a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#995-onnx-on-cuda-against-onnxruntime-and-tensorrt">99.5</a> (TensorRT: 98.3)</dd>
 </dl>
 
 {% include benchmark-chart.html id="onnx-strict" %}
@@ -146,7 +146,7 @@ build.
   <dt>Engines</dt><dd>Sharplight CUDA and Vulkan providers, reduced precision (f16 products); the official ByteDance-Seed/SeedVR inference code on PyTorch 2.14 with bf16 autocast and flash attention, in its fastest setting that fits in 32 GB.</dd>
   <dt>Procedure</dt><dd>The same 30 fps clip, 33 frames in one batch (65 and 17 in the extra rows), 2x upscaling with the wavelet colour fix, seed 42; end to end from reading the input video to writing the output video.</dd>
   <dt>Statistic</dt><dd>Median of 5 runs after one warm-up, on both; peak GPU memory sampled every 100 ms.</dd>
-  <dt>Log</dt><dd><a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1104-end-to-end">110.4</a>, <a href="https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md#1081-results">108.1</a></dd>
+  <dt>Log</dt><dd><a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1104-end-to-end">110.4</a>, <a href="https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1081-results">108.1</a></dd>
 </dl>
 
 {% include benchmark-chart.html id="seedvr2-pytorch" %}
@@ -243,5 +243,5 @@ VideoEnhancementBench --model <SeedVR2-3B> --provider cuda --input fox-240p-33.m
 ```
 
 Full log, including dropped experiments and open gaps:
-[docs/benchmarks.md](https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md).
+[docs/benchmarks.md](https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md).
 [Method]({{ '/docs/benchmark-methodology/' | relative_url }})

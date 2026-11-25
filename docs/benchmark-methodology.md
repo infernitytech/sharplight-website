@@ -6,7 +6,7 @@ permalink: /docs/benchmark-methodology/
 ---
 
 The [technical benchmarks page]({{ '/benchmarks/technical/' | relative_url }}) shows a selection from
-[docs/benchmarks.md](https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md), the round-by-round log
+[docs/benchmarks.md](https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md), the round-by-round log
 with before and after numbers, dropped experiments and open gaps. Each chart names its section of the log. A
 plain-language summary is on the [performance overview]({{ '/benchmarks/' | relative_url }}).
 
