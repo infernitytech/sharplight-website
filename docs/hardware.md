@@ -86,4 +86,4 @@ before loading.
 
 Source: [README](https://github.com/infernitytech/sharplight/blob/main/README.md),
 [macos.md](https://github.com/infernitytech/sharplight/blob/main/docs/macos.md),
-[benchmarks.md](https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md).
+[benchmarks.md](https://github.com/infernitytech/sharplight/blob/develop/docs/benchmarks.md).
