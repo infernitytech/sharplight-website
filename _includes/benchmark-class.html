@@ -1,8 +1,10 @@
 {%- assign en = include.engine | downcase -%}
-{%- if en contains "sharplight" -%}{%- assign ecls = "e-sl" -%}
+{%- if en contains "sharplight" and en contains "vulkan" -%}{%- assign ecls = "e-sl2" -%}
+{%- elsif en contains "sharplight" -%}{%- assign ecls = "e-sl" -%}
 {%- elsif en contains "vulkan" -%}{%- assign ecls = "e-llvk" -%}
 {%- elsif en contains "llama" -%}{%- assign ecls = "e-llcuda" -%}
 {%- elsif en contains "vllm" -%}{%- assign ecls = "e-vllm" -%}
 {%- elsif en contains "onnx" -%}{%- assign ecls = "e-onnx" -%}
 {%- elsif en contains "tensorrt" -%}{%- assign ecls = "e-trt" -%}
+{%- elsif en contains "pytorch" -%}{%- assign ecls = "e-pt" -%}
 {%- else -%}{%- assign ecls = "e-other" -%}{%- endif -%}

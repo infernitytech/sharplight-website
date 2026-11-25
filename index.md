@@ -64,16 +64,18 @@ var completion = await generator.GenerateAsync("The capital of France is", new G
 
 ## Performance
 
-One NVIDIA RTX PRO 4500, November 2026, our own measurements on the same weights for every engine:
+One NVIDIA RTX PRO 4500, November 2026, our own measurements with the same model files, procedure and statistic for
+every engine:
 
 - vLLM: serving throughput at parity (0.99-1.03x), first token in about half the time at 16 streams.
-- llama.cpp, same GGUF files and the same statistic: batched generation 1.6-3.2x on Vulkan and 1.1-2.0x on CUDA at 16-64 sequences.
-- MoE models larger than the GPU: generation at 1.4x of llama.cpp on Vulkan with experts in system memory (level on CUDA); DeepSeek-V3.1 (405 GB) read from disk at 1.6x of llama.cpp on one 32 GB GPU.
+- llama.cpp, same GGUF files: batched generation 1.6-3.2x on Vulkan and 1.1-2.0x on CUDA at 16-64 sequences.
+- MoE models larger than the GPU: generation at 1.2-1.5x of llama.cpp on Vulkan with experts in system memory (level on CUDA); a 405 GB model read from disk on one 32 GB GPU (DeepSeek-V3.1 at 1.56x of llama.cpp, GLM-5.2 at 0.75x).
 - ONNX on CUDA: faster than onnxruntime's CUDA provider on every measured model at the same precision setting.
+- SeedVR2 video restoration: 0.70x of the official PyTorch inference's time at 720p output; 960p output where it runs out of memory.
 
 {% include benchmark-chart.html id="ttft-vllm" %}
 
-[Method and caveats]({{ '/benchmarks/' | relative_url }})
+[Performance overview]({{ '/benchmarks/' | relative_url }}) · [Technical benchmarks, method and caveats]({{ '/benchmarks/technical/' | relative_url }})
 
 ## Platforms
 

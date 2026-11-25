@@ -144,6 +144,6 @@ dotnet build Sharplight.slnx -c Release
 ## Next
 
 [Docs]({{ '/docs/' | relative_url }}) · [Models]({{ '/models/' | relative_url }}) ·
-[Benchmarks]({{ '/benchmarks/' | relative_url }}) ·
+[Benchmarks]({{ '/benchmarks/technical/' | relative_url }}) ·
 [API overview](https://github.com/infernitytech/sharplight/blob/main/docs/api-overview.md) ·
 [Issues](https://github.com/infernitytech/sharplight/issues)

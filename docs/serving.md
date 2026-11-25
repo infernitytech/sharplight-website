@@ -83,7 +83,7 @@ Additional request fields: `priority`, `min_tokens`, `ignore_eos`, `user` (the f
 ## Scheduling
 
 Chat requests run on a continuous-batching engine
-([measurements]({{ '/benchmarks/#serving-throughput' | relative_url }})):
+([measurements]({{ '/benchmarks/technical/#serving-throughput' | relative_url }})):
 
 - Several sequences advance in one forward pass.
 - Requests with the same prompt prefix share its cached state.

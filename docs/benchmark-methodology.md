@@ -1,13 +1,14 @@
 ---
 title: Benchmark methodology
-lead: How the numbers on the benchmarks page are measured, what they do not show, and how to re-run them.
-description: Method, hardware, versions and limits of the Sharplight benchmarks against llama.cpp, vLLM and onnxruntime.
+lead: How the numbers on the benchmark pages are measured, what they do not show, and how to re-run them.
+description: Method, hardware, versions and limits of the Sharplight benchmarks against llama.cpp, vLLM, onnxruntime and reference implementations.
 permalink: /docs/benchmark-methodology/
 ---
 
-The [benchmarks page]({{ '/benchmarks/' | relative_url }}) shows a selection from
+The [technical benchmarks page]({{ '/benchmarks/technical/' | relative_url }}) shows a selection from
 [docs/benchmarks.md](https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md), the round-by-round log
-with before and after numbers, dropped experiments and open gaps. Each chart names its section of the log.
+with before and after numbers, dropped experiments and open gaps. Each chart names its section of the log. A
+plain-language summary is on the [performance overview]({{ '/benchmarks/' | relative_url }}).
 
 ## Principles
 
@@ -38,6 +39,7 @@ with before and after numbers, dropped experiments and open gaps. Each chart nam
 | llama.cpp | b11177, official CUDA 13 and Vulkan builds, `-ngl 99 -fa 1` |
 | vLLM | 0.33.0, CUDA graphs, prefix caching off |
 | onnxruntime | onnxruntime-gpu 1.32.0 (CUDA 13, cuDNN 9.28), CUDA and TensorRT 10.16 execution providers |
+| SeedVR2 reference | The official ByteDance-Seed/SeedVR inference code on PyTorch 2.14 (CUDA 13.0), bf16 autocast, flash attention |
 
 Log entries before 2026-11-15 are from a different GPU (RTX PRO 6000 Blackwell Max-Q) and are not comparable.
 
@@ -45,13 +47,15 @@ Log entries before 2026-11-15 are from a different GPU (RTX PRO 6000 Blackwell M
 
 | Test | Log sections | Method |
 |---|---|---|
-| Serving against vLLM | 104 | One server per engine, 16 or 64 slots of 512 tokens. `bench/loadgen.py` in a closed loop: prompts of about 250 random-word tokens, 128 output tokens, temperature 0, 64 requests per run. Throughput, time to first token (p50) and inter-token latency from the same runs, followed by the batched text check. |
+| Serving against vLLM | 104, 106 | One server per engine, 16 or 64 slots of 512 tokens (also 1 slot for the NVFP4 checkpoints). `bench/loadgen.py` in a closed loop: prompts of about 250 random-word tokens, 128 output tokens, temperature 0, 64 requests per run. Throughput, time to first token (p50) and inter-token latency from the same runs, followed by the batched text check. |
+| Serving at 64-256 streams | 105 | One server per engine sized for 256 sequences with the same number of KV-cache tokens and a 2,048-row step budget on both. `bench/loadgen.py --length-mix` (log-normal prompt and answer lengths, the same requests for both engines) in a closed loop at 64, 128 and 256 streams; throughput over the steady window, while every stream still has a request. |
 | Batched generation | 107 | 1-64 sequences decoding together after a 256-token prefill, a warm-up and a timed pass of 64 steps from a cleared cache, logits of every sequence copied to the host. Sharplight: `BatchBench --modes download --refill`. llama.cpp: `llama-batched-bench -npp 256 -ntg 64`. Mean step time of the 64 timed steps on both sides, average of two rounds. |
-| Experts in system memory | 107 | llama-bench's procedure on both sides: one warm-up, 5 runs, mean of the per-run tokens per second. Prefill of 512 tokens; generation of 64 tokens after a 512-token prompt. Sharplight: `--cpu-offload --bench 512`. llama.cpp: `llama-bench -ncmoe N` at its fastest N. Average of three rounds. |
+| Experts in system memory | 107, 111 | llama-bench's procedure on both sides: one warm-up, 5 runs, mean of the per-run tokens per second. Prefill of 512 tokens; generation of 64 tokens after a 512-token prompt. Sharplight: `--cpu-offload --bench 512`. llama.cpp: `llama-bench -ncmoe N` at its fastest N. Average of three rounds (section 107) or two rounds on CUDA and one on Vulkan (section 111). |
 | Experts on disk | 85, 87 | Greedy text of up to 24 tokens after the same prompt, each engine's reported generation speed. Sharplight reads experts into a fixed cache; llama.cpp memory-maps the file. Same memory limits for both. |
 | Single stream | 34 | Generation ("tg"): output tokens per second at a stated context depth. Sharplight: `--bench N`, several process runs, median decode step. llama.cpp: `llama-bench -r 5`, median. |
 | Serving throughput | 34.3 | One server per engine, 64 slots, 512-token contexts. Prompts of about 250 random-word tokens, 128 output tokens at temperature 0, at 1, 4, 16 and 64 simultaneous requests. 2 rounds each, median, with time to first token and inter-token latency. |
 | Prompt processing | 40.9 | Prompts of 512, 2048 and 8192 random token ids, no prefix caching, one warm-up and 5 timed prefills per length, median of the 5 on every side. |
+| Video enhancement (SeedVR2) | 108, 110 | The official checkpoint and inference code against Sharplight on the same clip, frame count, sizes, seed and colour fix; PyTorch in its fastest setting that fits in 32 GB. End to end from reading the input video to writing the output, median of 5 runs after one warm-up; output frames compared (PSNR) before timing. |
 | ONNX latency | 99 | `bench/onnx/parity_bench.py`: every measurement in its own process, engines of one model back to back, rounds interleaved, minimum wall-clock latency including the read-back of the outputs. Accuracy is checked against a reference in the same run. |
 
 ## What the numbers do not show

@@ -1,6 +1,6 @@
 - { title: Studio, url: /studio/ }
 - { title: Developers, url: /developers/ }
 - { title: Models, url: /models/ }
-- { title: Benchmarks, url: /benchmarks/ }
+- { title: Performance, url: /benchmarks/ }
 - { title: Docs, url: /docs/ }
 - { title: Enterprise, url: /enterprise/ }

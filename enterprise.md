@@ -91,7 +91,9 @@ Use cases, rollout, integration into your systems.
 - **APIs.** OpenAI- and Anthropic-compatible endpoints per space; existing clients change base URL and key.
 - **Models.** The first version serves language models and embeddings. The engine underneath also runs speech, vision,
   image and video models: [model list]({{ '/models/' | relative_url }}).
-- **Performance.** Measured against llama.cpp, vLLM and onnxruntime, gaps included: [benchmarks]({{ '/benchmarks/' | relative_url }}).
+- **Performance.** Serving throughput level with vLLM on one GPU, 1.6-3.2x of llama.cpp's with 16-64 users on Vulkan
+  GPUs; measured with the same model files on every engine, gaps included: [performance overview]({{ '/benchmarks/' | relative_url }}),
+  [technical benchmarks]({{ '/benchmarks/technical/' | relative_url }}).
 - **Engine.** Open source (MIT); it already serves one machine with API keys:
   [docs]({{ '/docs/' | relative_url }}), [serving guide]({{ '/docs/serving/' | relative_url }}).
 

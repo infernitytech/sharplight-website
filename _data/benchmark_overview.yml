@@ -1,0 +1,66 @@
+# Simple charts for the overview page /benchmarks/ (audience: decision makers).
+# Every value is a ratio taken from _data/benchmarks.yml or docs/benchmarks.md of the engine repository: Sharplight's speed
+# divided by the other engine's on the same hardware, the same model files, the same procedure and the same statistic.
+# 1.0 = the other engine; higher is better. `value: null` plus `text` shows a case without a ratio (for example the other
+# engine runs out of memory). Keep the rows where Sharplight is behind.
+#
+# - id: anchor on the page
+#   title / subtitle: plain language, no jargon
+#   baseline: name of the engine that is 1.0
+#   groups: [{ label, rows: [{ label, value, text?, note? }] }]
+#   source: section numbers of docs/benchmarks.md; details: anchor on /benchmarks/technical/
+
+- id: many-users
+  title: Many people asking at once, same GPU
+  subtitle: >-
+    Text written per second with 16 people using one GPU at the same time, compared with llama.cpp on the same GPU and
+    the same model files. Each person's answer is written faster by the same factor.
+  baseline: llama.cpp
+  source: "Section 107, mean step time on both engines"
+  details: batched-decode-vulkan
+  groups:
+    - label: Any GPU through Vulkan (here NVIDIA)
+      rows:
+        - { label: "Qwen3-8B (small)", value: 2.61 }
+        - { label: "Qwen3.8-27B (mid-size)", value: 3.19 }
+        - { label: "Gemma 4 31B (mid-size)", value: 2.47 }
+    - label: NVIDIA through CUDA
+      rows:
+        - { label: "Qwen3-8B (small)", value: 1.22 }
+        - { label: "Qwen3.8-27B (mid-size)", value: 1.62 }
+        - { label: "Gemma 4 31B (mid-size)", value: 1.09 }
+
+- id: larger-than-gpu
+  title: Models larger than the GPU
+  subtitle: >-
+    Speed of writing an answer for one person when most of the model sits in ordinary system memory (the model files are
+    37-63 GB, the GPU has 32 GB), compared with llama.cpp on the same machine and the same model files.
+  baseline: llama.cpp
+  source: "Sections 111 and 107, mean of 5 runs on both engines"
+  details: moe-offload-latest
+  groups:
+    - label: Any GPU through Vulkan (here NVIDIA)
+      rows:
+        - { label: "Qwen3-Coder-Next (48.5 GB)", value: 1.49 }
+        - { label: "Qwen3.5-122B (36.6 GB)", value: 1.45 }
+        - { label: "gpt-oss-120b (63.4 GB)", value: 1.19 }
+    - label: NVIDIA through CUDA
+      rows:
+        - { label: "Qwen3-Coder-Next (48.5 GB)", value: 0.99 }
+        - { label: "Qwen3.5-122B (36.6 GB)", value: 1.02 }
+        - { label: "gpt-oss-120b (63.4 GB)", value: 1.06 }
+
+- id: video
+  title: Video enhancement (SeedVR2)
+  subtitle: >-
+    Speed of restoring and doubling the resolution of a 33-frame clip, from reading the video to writing the result,
+    compared with the official implementation by the model's authors (PyTorch) on the same GPU and the same model files.
+  baseline: the official implementation
+  source: "Sections 110 and 108, median of 5 runs on both"
+  details: seedvr2-pytorch
+  groups:
+    - label: NVIDIA through CUDA (Vulkan within 2 %)
+      rows:
+        - { label: "240p to 480p", value: 1.14, note: "8.9 s against 10.1 s" }
+        - { label: "360p to 720p", value: 1.42, note: "24.8 s against 35.3 s" }
+        - { label: "480p to 960p", value: null, text: "Only Sharplight runs (72 s); the official implementation runs out of GPU memory" }

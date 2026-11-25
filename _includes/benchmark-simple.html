@@ -1,0 +1,32 @@
+{%- comment -%}A simple ratio chart from _data/benchmark_overview.yml: Sharplight relative to one other engine (1.0).{%- endcomment -%}
+{%- assign c = site.data.benchmark_overview | where: "id", include.id | first -%}
+{%- if c -%}
+{%- assign max = 1.0 -%}
+{%- for g in c.groups %}{% for r in g.rows %}{% if r.value and r.value > max %}{% assign max = r.value | times: 1.0 %}{% endif %}{% endfor %}{% endfor -%}
+{%- assign scale = max | times: 1.12 -%}
+{%- assign base_pos = 100.0 | divided_by: scale | round: 2 -%}
+<figure class="simple-chart" id="{{ c.id }}">
+  <figcaption>
+    <h3>{{ c.title }}</h3>
+    <p class="muted">{{ c.subtitle }}</p>
+    <p class="sc-key"><strong>Higher is better.</strong> <span class="sc-key-base" aria-hidden="true"></span> 1.0 = {{ c.baseline }}</p>
+  </figcaption>
+  {%- for g in c.groups %}
+  <div class="sc-group">
+    <div class="sc-glabel">{{ g.label }}</div>
+    {%- for r in g.rows %}
+    <div class="sc-row{% if r.value and r.value < 1.0 %} below{% endif %}">
+      <span class="sc-label">{{ r.label }}{% if r.note %}<small>{{ r.note }}</small>{% endif %}</span>
+      {%- if r.value %}
+      <span class="sc-track" role="img" aria-label="{{ r.label }}: {{ r.value }} times {{ c.baseline }}"><span class="sc-fill" style="width:{{ r.value | times: 100.0 | divided_by: scale | round: 2 }}%"></span><span class="sc-base" style="left:{{ base_pos }}%"></span></span>
+      <span class="sc-val">{{ r.value }}&times;</span>
+      {%- else %}
+      <span class="sc-text">{{ r.text }}</span>
+      {%- endif %}
+    </div>
+    {%- endfor %}
+  </div>
+  {%- endfor %}
+  <p class="small muted sc-src">Source: {{ c.source }}. <a href="{{ '/benchmarks/technical/' | relative_url }}#{{ c.details }}">Details and method</a></p>
+</figure>
+{%- endif -%}
