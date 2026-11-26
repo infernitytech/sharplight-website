@@ -793,7 +793,7 @@
     - "At 832 x 480 -> 1664 x 960 the official script runs out of memory in all three settings; Sharplight takes 72.2 s on CUDA (73.4 s on Vulkan) with the earlier build of section 108, before the convolution change. 1920 x 1088 output runs out of memory on both."
     - "Output agrees with PyTorch's: worst frame 48.9 dB PSNR, mean 49.4-49.5 dB on CUDA and Vulkan (17 frames, the same input frames and noise)."
     - "Peak memory (section 108 build): 23.1 against 31.1 GiB at 480p, 21.7 against 30.6 GiB at 720p."
-    - "Not repeated with the current build: the 7B model and 65-frame clips, where Sharplight was 1.35x and 1.59x of PyTorch's time before the convolution change (section 108)."
+    - "Not repeated with the current build: 65-frame clips, where Sharplight was 1.59x of PyTorch's time before the convolution change (section 108). The 7B is verified on the official checkpoints (section 108.5); its speed has not been compared like for like yet."
   source: "docs/benchmarks.md sections 110.4 and 108.1"
   source_url: https://github.com/infernitytech/sharplight/blob/main/docs/benchmarks.md#1104-end-to-end
   date: 2026-11-24
