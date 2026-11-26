@@ -173,7 +173,7 @@ published yet.
 
 ## Where Sharplight is behind
 
-- **Inter-token latency tail against vLLM at 16 streams**: p99 48-85 ms against 21-28 ms, mean 2-5 % higher (section 104).
+- **Inter-token latency tail against vLLM at 16 streams**: closed for Llama-3.1-8B bf16 (p99 35 ms against vLLM's 33.5, at 1.01x its throughput and 100 ms against 326 ms time to first token; section 114). Still behind on Qwen3-8B-FP8 (p99 24 against 16 ms; section 113) and gpt-oss-20b (p99 47 against 13 ms, where the long prompt steps set the tail). On Llama the p95 is 33 against 21 ms: arriving prompts ride decode steps, which keeps our time to first token lower.
 - **NVFP4 checkpoints against vLLM at 64 streams**: 0.85x (Qwen3-8B) and 0.82x (Qwen3-30B-A3B MoE) of vLLM's throughput, and
   0.97x for Qwen3-8B at 16 streams; vLLM ran its CUTLASS FP4 kernels (section 106).
 - **Llama-3.1-8B (bf16) against vLLM at 64-128 streams with mixed request lengths**: 0.99x and 0.92x; at 256 streams, where
