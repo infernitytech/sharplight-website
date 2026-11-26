@@ -142,7 +142,7 @@ build.
 
 <dl class="setup">
   <dt>Hardware</dt><dd>One NVIDIA RTX PRO 4500 Blackwell (32 GB, 200 W power limit), driver 595.112, CUDA 13.2.</dd>
-  <dt>Model files</dt><dd>The official SeedVR2 checkpoints (<code>seedvr2_ema_3b.pth</code>, <code>ema_vae.pth</code>; the 7B as <code>seedvr2_ema_7b_fp16.safetensors</code>), loaded unchanged by both.</dd>
+  <dt>Model files</dt><dd>The official SeedVR2 checkpoints (<code>seedvr2_ema_3b.pth</code>, <code>ema_vae.pth</code>; for the 7B the official <code>seedvr2_ema_7b.pth</code> and <code>seedvr2_ema_7b_sharp.pth</code>), loaded unchanged by both.</dd>
   <dt>Engines</dt><dd>Sharplight CUDA and Vulkan providers, reduced precision (f16 products); the official ByteDance-Seed/SeedVR inference code on PyTorch 2.14 with bf16 autocast and flash attention, in its fastest setting that fits in 32 GB.</dd>
   <dt>Procedure</dt><dd>The same 30 fps clip, 33 frames in one batch (65 and 17 in the extra rows), 2x upscaling with the wavelet colour fix, seed 42; end to end from reading the input video to writing the output video.</dd>
   <dt>Statistic</dt><dd>Median of 5 runs after one warm-up, on both; peak GPU memory sampled every 100 ms.</dd>
@@ -161,10 +161,9 @@ Measured with the build of log section 108, before the convolution change of sec
 | 3B, 65 frames, 416 x 240 → 832 x 480 | 30.80 s | 19.35 s | 26.1 / 30.7 GiB |
 | 3B, 33 frames, 832 x 480 → 1664 x 960 | 72.20 s (Vulkan 73.44 s) | out of memory in all three settings | 30.8 GiB / - |
 | 3B, 33 frames, 960 x 544 → 1920 x 1088 | out of memory | out of memory | - |
-| 7B, 17 frames, 416 x 240 → 832 x 480 | 8.11 s | 5.99 s | 29.8 / 30.0 GiB |
 
-Output against PyTorch's frames (same input frames and noise): worst frame 48.9 dB (3B, section 110.5) and 44.8 dB (7B,
-section 108.1).
+Output against PyTorch's frames (same input frames and noise): worst frame 48.9 dB (3B, section 110.5); 44.2 dB (7B) and 42.7 dB (7B sharp) on the official checkpoints, CUDA and Vulkan
+(section 108.5).
 
 ### Image generation and audio
 
@@ -194,8 +193,9 @@ published yet.
   takes 6.0 s against llama.cpp's 2.0 s (section 87).
 - **TensorRT**: ahead on convnext-tiny, mobilesam, yolov10n, ssd-10, segformer-b0 (batch 1) and resnet50 (batch 8) by
   1.08-1.23x (section 99).
-- **SeedVR2 7B and 65-frame clips** (earlier build, section 108): 1.35x and 1.59x of the official PyTorch inference's time;
-  not yet repeated with the faster convolutions of section 110. 1920 x 1088 output does not fit in 32 GB (nor for PyTorch).
+- **SeedVR2 65-frame clips** (earlier build, section 108): 1.59x of the official PyTorch inference's time, not yet repeated
+  with the faster convolutions of section 110. The 7B's speed against the official code has not been measured like for like on
+  the official checkpoints yet. 1920 x 1088 output does not fit in 32 GB (nor for PyTorch).
 - **Single-stream generation against llama.cpp CUDA** (Vulkan provider, section 34): 1 to 12 % behind, most on the smallest
   models.
 
